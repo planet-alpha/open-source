@@ -3623,7 +3623,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3656,7 +3657,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -3726,7 +3727,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3759,7 +3761,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -3844,7 +3846,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3877,7 +3880,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -3963,7 +3966,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3996,7 +4000,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4066,7 +4070,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4099,7 +4104,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4185,7 +4190,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4218,7 +4224,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4300,7 +4306,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4333,7 +4340,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4341,7 +4348,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_mspan_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_mspan_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4353,7 +4360,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_mspan_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_mspan_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4365,7 +4372,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_mcache_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_mcache_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4377,7 +4384,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_mcache_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_mcache_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4389,7 +4396,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_buck_hash_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_buck_hash_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4401,7 +4408,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_gc_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_gc_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4413,7 +4420,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_other_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"} - go_memstats_other_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_other_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"} - go_memstats_other_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "bytes of memory are used for other runtime allocations {pod={{kubernetes_pod_name}}}",
@@ -4426,7 +4433,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_next_gc_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_next_gc_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4484,7 +4491,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4517,7 +4525,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4525,7 +4533,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_heap_alloc_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_heap_alloc_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4537,7 +4545,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_heap_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_heap_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4549,7 +4557,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_heap_idle_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_heap_idle_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4561,7 +4569,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_heap_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_heap_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -4574,7 +4582,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_heap_released_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_heap_released_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4632,7 +4640,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4665,7 +4674,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4673,7 +4682,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_stack_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_stack_inuse_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4685,7 +4694,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_stack_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_stack_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4743,7 +4752,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4776,7 +4786,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4784,7 +4794,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_sys_bytes{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4842,7 +4852,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4875,7 +4886,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4883,7 +4894,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"} - go_memstats_frees_total{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$gopod\"} - go_memstats_frees_total{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -4942,7 +4953,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4975,7 +4987,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -4983,7 +4995,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}[1m])",
+          "expr": "rate(go_memstats_mallocs_total{namespace=\"$namespace\", pod=~\"$gopod\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -5042,7 +5054,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5074,7 +5087,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -5082,7 +5095,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(go_memstats_lookups_total{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}[1m])",
+          "expr": "rate(go_memstats_lookups_total{namespace=\"$namespace\", pod=~\"$gopod\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -5140,7 +5153,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5172,7 +5186,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -5180,7 +5194,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_goroutines{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_goroutines{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -5238,7 +5252,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5270,7 +5285,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -5278,7 +5293,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(go_memstats_alloc_bytes_total{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}[1m])",
+          "expr": "rate(go_memstats_alloc_bytes_total{namespace=\"$namespace\", pod=~\"$gopod\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -5336,7 +5351,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5368,7 +5384,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -5376,7 +5392,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "go_gc_duration_seconds{namespace=\"$namespace\", pod=~\"$gopod\", endpoint=~\"$endpoint\"}",
+          "expr": "go_gc_duration_seconds{namespace=\"$namespace\", pod=~\"$gopod\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "range": true,
@@ -5468,18 +5484,6 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
-      },
-      {
-        "current": {
-          "text": "metrics",
-          "value": "metrics"
-        },
-        "hide": 2,
-        "label": "endpoint",
-        "name": "endpoint",
-        "query": "metrics",
-        "skipUrlSync": true,
-        "type": "constant"
       }
     ]
   },
