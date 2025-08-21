@@ -21,7 +21,7 @@
           "uid": "prometheus"
         },
         "enable": true,
-        "expr": "resets(process_uptime_seconds{application=\"$application\", instance=\"$instance\"}[1m]) > 0",
+        "expr": "resets(process_uptime_seconds{service=\"$service\", pod=~\"$pod\"}[1m]) > 0",
         "hide": false,
         "iconColor": "rgba(255, 96, 96, 1)",
         "limit": 100,
@@ -734,7 +734,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max(http_server_requests_seconds_max{application=\"$application\", instance=\"$instance\", status!~\"5..\"})",
+          "expr": "max(http_server_requests_seconds_max{service=\"$service\", pod=~\"$pod\", status!~\"5..\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -2454,7 +2454,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Eden Space\"}",
+          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2471,7 +2471,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Eden Space\"}",
+          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2488,7 +2488,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Eden Space\"}",
+          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Eden Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2593,7 +2593,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Survivor Space\"}",
+          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Survivor Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2610,7 +2610,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Survivor Space\"}",
+          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Survivor Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2627,7 +2627,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Survivor Space\"}",
+          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Survivor Space\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2732,7 +2732,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Tenured Gen\"}",
+          "expr": "jvm_memory_used_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Old Gen\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2749,7 +2749,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Tenured Gen\"}",
+          "expr": "jvm_memory_committed_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Old Gen\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2766,7 +2766,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"Tenured Gen\"}",
+          "expr": "jvm_memory_max_bytes{service=\"$service\", pod=~\"$pod\", id=~\"G1 Old Gen\"}",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -2778,7 +2778,7 @@
           "step": 1800
         }
       ],
-      "title": "Tenured Gen",
+      "title": "Old Gen",
       "type": "timeseries"
     },
     {
@@ -3431,7 +3431,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "jvm_gc_pause_seconds_max{application=\"$application\", instance=\"$instance\"}",
+          "expr": "jvm_gc_pause_seconds_max{service=\"$service\", pod=~\"$pod\"}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -5433,8 +5433,8 @@
       {
         "allValue": ".*",
         "current": {
-          "text": "support-8549bd4fb8-kbrln",
-          "value": "support-8549bd4fb8-kbrln"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "prometheus",
         "definition": "label_values(process_start_time_seconds{service=\"$service\"},pod)",
