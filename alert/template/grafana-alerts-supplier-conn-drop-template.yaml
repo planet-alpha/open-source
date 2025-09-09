@@ -1,0 +1,138 @@
+# Grafana 供应商应用连接数与 total 不相等持续 2 分钟告警 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 ${DS_PROMETHEUS_UID} 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-Supplier-App-Connections" 文件夹下
+# 4) 触发逻辑与参数：
+#    - 触发条件：abs( sum by (name, appName)(online_supplier_app{…实际…}) - avg by (name, appName)(online_supplier_app{…total…}) ) > 0 持续 2m
+#    - 评估窗口：EVAL_FROM_SECONDS（默认 180s），仅用于注解内“三点数据”展示
+#    - 提示：如 total 的标签值固定，建议精确匹配；avg by 用于去重，亦可换为 max/min
+#    - 评估频率：由 groups.interval 控制（默认 1m），配合 for: 2m 实现“第三分钟触发”
+# 环境变量：
+#    - EVAL_FROM_SECONDS: 评估回看秒数（默认：180 秒）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier App Connection Alerts
+    folder: Business-Supplier-App-Connections
+    interval: 1m
+    rules:
+      - uid: supplier_app_conn_drop_not_recovered_1m
+        title: SupplierAppConnectionsDropNotRecovered1m
+        condition: E
+        data:
+          # A: 实际连接数（按 name, appName 聚合）
+          - refId: A
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-180}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                sum by (name, appName) (
+                  online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "实际 sum (name, appName)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+
+          # B: total 基线（按 name, appName 归并去重，用 avg）
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-180}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                avg by (name, appName) (
+                  online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "基线 total avg (name, appName)"
+              maxDataPoints: 43200
+              range: true
+              refId: B
+
+          # C: 计算 |A-B| 的表达式
+          - refId: C
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-180}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: abs($A - $B)
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # D: 将 C 归约为单值（last）
+          - refId: D
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-180}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              type: reduce
+              reducer: last
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # E: 阈值判断（> 0）
+          - refId: E
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-180}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [D]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: D
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: E
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        # for: 2m 表示条件需持续为真至少 2 分钟，等价于“连续两分钟不相等，第三分钟触发”
+        for: 2m
+        annotations:
+          summary: 供应商{{ $labels.name }}应用{{ $labels.appName }} 连接数异常
+          description: |
+            【故障影响】供应商应用连接数与 total 基线不相等已持续 2 分钟，现已触发报警
+        labels:
+          severity: warning
+          category: business-supplier-app-connections
+          alert_type: connection_drop6

@@ -1,0 +1,148 @@
+# Grafana 供应商提交响应回执下降率告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 ${DS_PROMETHEUS_UID} 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-Supplier-Receipt" 文件夹下
+# 4) 环境变量（可在 Grafana 中设置或直接替换本文内变量）：
+#    - EVAL_FROM_SECONDS：评估回看秒数（默认：1800，即30分钟）
+#    - FOR_DURATION：告警持续判定时长（默认：3m）
+#    - MIN_BASELINE_TOTAL：基线总量阈值（过去30m内1m向供应商提交的非超时总量均值），低于该值不触发（默认：100）
+#    - MIN_ABS_DROP：绝对下降阈值（基于供应商响应回执的1m均值与当前1m的差值），默认：10
+#    - RECEIPT_DROP_PCT_THRESHOLD：供应商响应回执下降比例阈值(%)，默认：5（表示相对30m基线下降≥5%触发）
+# 说明：
+# - 监控供应商对我们提交请求的响应回执比例，采用过去30分钟的平均回执比例作为动态基线，避免短时偶发波动造成频繁误报
+# - 同时设置"绝对下降基线"和"总量基线"作为门槛：
+#   1) 绝对下降基线：过去30m的1m供应商响应回执数均值 - 当前1m供应商响应回执数 ≥ MIN_ABS_DROP
+#   2) 总量基线：过去30m的1m向供应商提交的非超时总量均值 ≥ MIN_BASELINE_TOTAL
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier Submit Response Receipt Drop Alerts
+    folder: Business-Supplier-Receipt
+    interval: 1m
+    rules:
+      - uid: supplier_receipt_drop_rate
+        title: SupplierReceiptDropRate
+        condition: D
+        data:
+          # A: 回执下降比例(%)，相对30m动态基线，且满足绝对下降与总量基线门槛
+          - refId: A
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                # 计算回执下降比例(%)，相对30m动态基线，并应用双门槛过滤
+                clamp_min(
+                  (
+                    # R_base: 30m基线回执比例(%)
+                    100 * avg_over_time((
+                      sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    )[30m:1m])
+                    
+                    -
+                    
+                    # R_cur: 当前1m回执比例(%)
+                    100 * (
+                      sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    )
+                  )
+                  /
+                  # 除以基线比例，得到相对下降比例
+                  100 * avg_over_time((
+                    sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  )[30m:1m])
+                  * 100, 0
+                )
+                and (
+                  # 绝对下降门槛：30m内1m回执数均值 - 当前1m回执数 >= MIN_ABS_DROP
+                  avg_over_time(sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))[30m:1m])
+                  -
+                  sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  >= ${MIN_ABS_DROP:-10}
+                )
+                and (
+                  # 总量基线门槛：30m内1m非超时总量的均值 >= MIN_BASELINE_TOTAL
+                  avg_over_time(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))[30m:1m]) >= ${MIN_BASELINE_TOTAL:-100}
+                )
+                and (
+                  # 基线回执比例必须大于0，避免除零错误
+                  100 * avg_over_time((
+                    sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  )[30m:1m]) > 0
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}下降比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          
+          # C: 数据聚合——对A的时间序列数据进行reduce操作
+          - refId: C
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          
+          # D: 阈值判断——当下降比例 ≥ RECEIPT_DROP_PCT_THRESHOLD 触发
+          - refId: D
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [${RECEIPT_DROP_PCT_THRESHOLD:-5}]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: ${FOR_DURATION:-3m}
+        annotations:
+          summary: 供应商回执下降率异常
+          description: 供应商 {{ $labels.name }}/{{ $labels.appName }} 的回执下降率异常
+        labels:
+          severity: warning
+          category: business-supplier-receipt
+          alert_type: receipt_drop_rate

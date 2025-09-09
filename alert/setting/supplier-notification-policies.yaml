@@ -1,0 +1,109 @@
+# Grafana Unified Alerting - Supplier Notification Policies
+# 使用说明：将本文件放入 Grafana provisioning/alerting 目录，重启/Reload Grafana 生效。
+# 目的：为供应商告警配置通知策略和路由规则
+# 覆盖范围：
+# 1) 连接数与 total 基线不相等（business-supplier-app-connections）
+# 2) 交付质量（business-supplier-delivery）
+# 3) 请求耗时（alert_type =~ supplier_latency_.*，可选 category=business-supplier-latency）
+# 4) 上行（MO）TPS（business-supplier-mo-tps）
+# 5) 提交响应回执下降（supplier_receipt_drop）
+# 6) 供应商侧 TPS 激增（business-tps-surge）
+
+apiVersion: 1
+policies:
+    - orgId: 1
+      receiver: supplier-conn-drop
+      group_by:
+        - grafana_folder
+        - alertname
+      routes:
+        - receiver: supplier-conn-drop
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-supplier-app-connections
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+        - receiver: supplier-deliver
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-supplier-delivery
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+        - receiver: supplier-latency
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-supplier-latency
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+        - receiver: supplier-mo-tps
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-supplier-mo-tps
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+        - receiver: supplier-submitresp-drop
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - supplier_receipt_drop
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+        - receiver: supplier-tps-surge
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-tps-surge
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h

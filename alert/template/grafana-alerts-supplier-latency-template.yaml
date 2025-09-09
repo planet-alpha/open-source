@@ -1,0 +1,252 @@
+# Grafana 供应商侧请求耗时（p95/p99/平均）告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 ${DS_PROMETHEUS_UID} 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警将出现在 "Business-Latency" 文件夹下
+# 4) 可通过环境变量定制阈值或评估窗口：
+#    - SUPPLIER_P95_MS_THRESHOLD: 供应商侧 p95 延迟阈值（毫秒，默认：600）
+#    - SUPPLIER_P99_MS_THRESHOLD: 供应商侧 p99 延迟阈值（毫秒，默认：1200）
+#    - SUPPLIER_AVG_MS_THRESHOLD: 供应商侧平均延迟阈值（毫秒，默认：400）
+#    - EVAL_FROM_SECONDS: 评估回看秒数（默认：300 秒，即 5 分钟）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier Latency Alerts
+    folder: Business-Latency
+    interval: 1m
+    rules:
+      # 供应商侧 p95 延迟预警（warning）
+      - uid: supplier_latency_p95_high
+        title: SupplierLatencyP95High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                histogram_quantile(
+                  0.95,
+                  sum(rate(supplier_request_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m]))
+                  by (le, name, appName)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} p95"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [${SUPPLIER_P95_MS_THRESHOLD:-600}]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: 供应商侧 p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            最近 5 分钟内，供应商侧 p95 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 ${SUPPLIER_P95_MS_THRESHOLD:-600} ms。
+            供应商服务响应变慢，可能影响上游业务。请检查供应商服务状态、网络连接及下游依赖。
+        labels:
+          severity: warning
+          category: latency
+          alert_type: supplier_latency_p95
+
+      # 供应商侧 p99 延迟严重告警（critical）
+      - uid: supplier_latency_p99_high
+        title: SupplierLatencyP99High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                histogram_quantile(
+                  0.99,
+                  sum(rate(supplier_request_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m]))
+                  by (le, name, appName)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} p99"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [${SUPPLIER_P99_MS_THRESHOLD:-1200}]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: 供应商侧 p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            最近 5 分钟内，供应商侧 p99 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 ${SUPPLIER_P99_MS_THRESHOLD:-1200} ms。
+            供应商长尾延迟严重升高，可能导致上游服务超时。请尽快排查供应商服务状态。
+        labels:
+          severity: critical
+          category: latency
+          alert_type: supplier_latency_p99
+
+      # 供应商侧平均耗时预警（warning）
+      - uid: supplier_latency_avg_high
+        title: SupplierLatencyAvgHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  rate(supplier_request_duration_ms_sum{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  /
+                  rate(supplier_request_duration_ms_count{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} avg"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [${SUPPLIER_AVG_MS_THRESHOLD:-400}]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: 供应商侧平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            最近 10 分钟内，供应商侧平均请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 ${SUPPLIER_AVG_MS_THRESHOLD:-400} ms。
+            供应商整体性能退化，建议关注供应商容量、资源使用情况及服务健康状态。
+        labels:
+          severity: warning
+          category: latency
+          alert_type: supplier_latency_avg

@@ -1,0 +1,126 @@
+# Grafana Unified Alerting - Supplier Contact Points
+# 使用说明：将本文件放入 Grafana provisioning/alerting 目录，重启/Reload Grafana 生效。
+# 目的：为以下六类供应商告警创建独立 contact points
+# 覆盖范围：
+# 1) 连接数与 total 基线不相等（business-supplier-app-connections）
+# 2) 交付质量（business-supplier-delivery）
+# 3) 请求耗时（alert_type =~ supplier_latency_.*，可选 category=business-supplier-latency）
+# 4) 上行（MO）TPS（business-supplier-mo-tps）
+# 5) 提交响应回执下降（supplier_receipt_drop）
+# 6) 供应商侧 TPS 激增（business-tps-surge）
+apiVersion: 1
+contactPoints:
+  # 1) 连接数偏离 total 基线
+  - orgId: 1
+    name: supplier-conn-drop
+    receivers:
+      # - uid: supplier-conn-drop-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_conn_drop@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier Conn Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-conn-drop-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 2) 交付质量（回执/超时/成功/失败/短期失败激增/地区细分）
+  - orgId: 1
+    name: supplier-deliver
+    receivers:
+      # - uid: supplier-deliver-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_deliver@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier Delivery] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-deliver-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 3) 请求耗时（P95/P99/平均）
+  - orgId: 1
+    name: supplier-latency
+    receivers:
+      # - uid: supplier-latency-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_latency@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-latency-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 4) 上行（MO）TPS 多级（warning/high/critical）
+  - orgId: 1
+    name: supplier-mo-tps
+    receivers:
+      # - uid: supplier-mo-tps-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_mo_tps@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier MO TPS] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-mo-tps-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 5) 提交响应回执下降（Warning）
+  - orgId: 1
+    name: supplier-submitresp-drop
+    receivers:
+      # - uid: supplier-submitresp-drop-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_submitresp_drop@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier SubmitResp Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-submitresp-drop-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 6) 供应商侧 TPS 激增（多级）
+  - orgId: 1
+    name: supplier-tps-surge
+    receivers:
+      # - uid: supplier-tps-surge-email
+      #   type: email
+      #   disableResolveMessage: false
+      #   settings:
+      #     addresses: "replace_me_supplier_tps_surge@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Supplier TPS Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: supplier-tps-surge-feishu
+        type: webhook
+        disableResolveMessage: false
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'

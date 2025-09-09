@@ -1,0 +1,83 @@
+# Grafana Unified Alerting - Supplier Inhibit Policies and Mute Time Intervals
+# 使用说明：将本文件放入 Grafana provisioning/alerting 目录，重启/Reload Grafana 生效。
+# 目的：为供应商告警配置抑制策略和静默时间
+# 说明：下方抑制策略严格依据各设计文档的抑制建议配置。
+apiVersion: 1
+inhibitPolicies:
+  # A) 上位可用性/致命故障抑制连接类告警
+  - orgId: 1
+    sourceMatchers:
+      - "category=supplier_availability"
+      - "severity=critical"
+    targetMatchers:
+      - "category=business-supplier-app-connections"
+      - "severity=warning"
+    equal: ["name", "appName"]
+
+  # B) 交付：Critical 抑制 Warning（同维度）
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-supplier-delivery"
+      - "severity=critical"
+    targetMatchers:
+      - "category=business-supplier-delivery"
+      - "severity=warning"
+    equal: ["name", "appName"]
+  # B-2) 交付地区细分：带 countryId 的同维度抑制
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-supplier-delivery"
+      - "severity=critical"
+    targetMatchers:
+      - "category=business-supplier-delivery"
+      - "severity=warning"
+    equal: ["name", "appName", "countryId"]
+
+  # C) 延迟：P99 抑制 P95（同服务）
+  - orgId: 1
+    sourceMatchers:
+      - "severity=critical"
+      - "alert_type=supplier_latency_p99"
+    targetMatchers:
+      - "severity=warning"
+      - "alert_type=supplier_latency_p95"
+    equal: ["name", "appName"]
+
+
+  # D) MO TPS：内部高等级抑制低等级
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-supplier-mo-tps"
+      - "severity=critical"
+    targetMatchers:
+      - "category=business-supplier-mo-tps"
+      - "severity=~^(warning|high)$"
+    equal: ["name", "appName", "alert_type"]
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-supplier-mo-tps"
+      - "severity=high"
+    targetMatchers:
+      - "category=business-supplier-mo-tps"
+      - "severity=warning"
+    equal: ["name", "appName", "alert_type"]
+
+
+
+  # F) TPS 激增：内部高等级抑制低等级
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-tps-surge"
+      - "severity=critical"
+    targetMatchers:
+      - "category=business-tps-surge"
+      - "severity=~^(warning|high)$"
+    equal: ["name", "appName", "alert_type"]
+  - orgId: 1
+    sourceMatchers:
+      - "category=business-tps-surge"
+      - "severity=high"
+    targetMatchers:
+      - "category=business-tps-surge"
+      - "severity=warning"
+    equal: ["name", "appName", "alert_type"]

@@ -1,0 +1,272 @@
+# Grafana 供应商侧上行（MO）TPS 多级告警（Prometheus 数据源）
+# 使用说明：
+# 1) 本文件已将数据源 UID 设置为 few51rsrq2ry8b（与供应商侧 TPS 激增配置保持一致）。如需调整，请替换 datasourceUid/uid 字段。
+# 2) 将文件放到 Grafana provisioning/alerting 目录并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-Supplier-MO-TPS" 文件夹下
+# 4) 可通过环境变量调整阈值（以下为默认值）：
+#    - WINDOW：平滑窗口，默认 5m
+#    - EVAL_FROM_SECONDS：评估回看秒数，默认 600（10 分钟）
+#    - SURGE_MULTIPLIER_WARN/HIGH/CRIT：激增倍率阈值，默认 2/3/5
+#    - SURGE_ABSOLUTE_QPS_WARN/HIGH/CRIT：激增绝对 QPS 阈值，默认 10/20/50
+#    - DROP_MULTIPLIER_WARN/HIGH/CRIT：骤降倍率阈值，默认 0.5/0.3/0.1
+#    - BASELINE_MIN_QPS：基线最低 QPS（骤降需满足），默认 5
+#    - FOR_WARN_SURGE/FOR_HIGH_SURGE/FOR_CRIT_SURGE：激增 for 时长，默认 3m/5m/5m
+#    - FOR_WARN_DROP/FOR_HIGH_DROP/FOR_CRIT_DROP：骤降 for 时长，默认 5m/10m/15m
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier MO TPS Alerts
+    folder: Business-Supplier-MO-TPS
+    interval: 1m
+    rules:
+      # ======================= 激增(WARNING) =======================
+      - uid: supplier_mo_tps_surge_warning
+        title: SupplierMoTpsSurge(Warning)
+        condition: D
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                2
+                *
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 2倍基线"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                10
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 绝对阈值"
+              maxDataPoints: 43200
+              range: true
+              refId: B
+          - refId: D
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A AND B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: MO TPS 激增(Warning) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          description: |
+            当前 5m TPS 明显高于 1h 基线。
+            条件：倍率 ≥ 2 且 绝对TPS > 10 QPS，持续 3m。
+            可能原因：异常上行流量、循环上报、突发业务峰值。
+        labels:
+          severity: warning
+          category: business-supplier-mo-tps
+          alert_type: tps_surge
+
+      # ======================= 激增(HIGH) =======================
+      - uid: supplier_mo_tps_surge_high
+        title: SupplierMoTpsSurge(High)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                3
+                *
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 3倍基线"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                20
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 绝对阈值"
+              maxDataPoints: 43200
+              range: true
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A AND B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: MO TPS 激增(High) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          description: |
+            当前 5m TPS 显著高于 1h 基线。
+            条件：倍率 ≥ 3 且 绝对TPS > 20 QPS，持续 5m。
+        labels:
+          severity: high
+          category: business-supplier-mo-tps
+          alert_type: tps_surge
+
+      # ======================= 激增(CRITICAL) =======================
+      - uid: supplier_mo_tps_surge_critical
+        title: SupplierMoTpsSurge(Critical)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                5
+                *
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 5倍基线"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                >
+                50
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增 - 绝对阈值"
+              maxDataPoints: 43200
+              range: true
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+                - evaluator: { params: [1], type: gt }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A AND B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: MO TPS 激增(Critical) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          description: |
+            当前 5m TPS 远高于 1h 基线。
+            条件：倍率 ≥ 5 且 绝对TPS > 50 QPS，持续 5m。
+        labels:
+          severity: critical
+          category: business-supplier-mo-tps
+          alert_type: tps_surge

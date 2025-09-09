@@ -1,0 +1,621 @@
+# Grafana 供应商回执告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 ${DS_PROMETHEUS_UID} 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警将出现在 "Business-Delivery" 文件夹下
+# 4) 可通过环境变量定制阈值或评估窗口：
+#    - DELIVER_EVAL_SECONDS: 长窗口回看秒数（默认：1800 秒，即过去 30 分钟）
+#    - SHORT_EVAL_SECONDS: 短窗口回看秒数（默认：300 秒，即过去 5 分钟）
+#    - DELIVERY_RATE_LOW: 回执比例过低阈值（默认：0.85，即 85%）
+#    - TIMEOUT_RATE_HIGH: 超时比例过高阈值（默认：0.15，即 15%）
+#    - SUCCESS_RATE_LOW: 成功比例过低阈值（默认：0.90，即 90%）
+#    - FAILURE_RATE_HIGH: 失败比例过高阈值（默认：0.10，即 10%）
+#    - MIN_BASELINE_SHORT: 短窗口最小基线回执量（默认：30，5 分钟内回执总量不足则忽略比例）
+#    - MIN_BASELINE_COUNT: 长窗口最小基线回执量（默认：100，30 分钟内回执总量不足则忽略比例）
+#    - SURGE_FACTOR: 短期/长期比例变化倍数阈值（默认：2）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier Deliver Alerts
+    folder: Business-Delivery
+    interval: 1m
+    rules:
+      # 回执比例过低告警 (低回执率可能意味着供应商响应问题)
+      - uid: supplier_deliver_receipt_rate_low
+        title: SupplierDeliverReceiptRateLow
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  ) < ${DELIVERY_RATE_LOW:-0.85}
+                )
+                and
+                (
+                  sum by(name, appName)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} receipt_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 供应商回执比例过低 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            30 分钟内回执比例低于 ${DELIVERY_RATE_LOW:-0.85}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: receipt_rate_low
+
+      # 超时比例过高告警
+      - uid: supplier_deliver_timeout_rate_high
+        title: SupplierDeliverTimeoutRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  ) > ${TIMEOUT_RATE_HIGH:-0.15}
+                )
+                and
+                (
+                  sum by(name, appName)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} timeout_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 供应商回执超时比例过高 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            30 分钟内超时比例超过 ${TIMEOUT_RATE_HIGH:-0.15}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: timeout_rate_high
+
+      # 成功比例过低告警 (基于非超时的回执)
+      - uid: supplier_deliver_success_rate_low
+        title: SupplierDeliverSuccessRateLow
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^(DELIVRD|ACCEPTD)$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m])), 1)
+                  ) < ${SUCCESS_RATE_LOW:-0.90}
+                )
+                and
+                (
+                  sum by(name, appName)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} success_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 供应商回执成功比例过低 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            30 分钟内成功比例(DELIVRD|ACCEPTD)低于 ${SUCCESS_RATE_LOW:-0.90}
+        labels:
+          severity: critical
+          category: delivery
+          alert_type: success_rate_low
+
+      # 失败比例过高告警 (基于非超时的回执)
+      - uid: supplier_deliver_failure_rate_high
+        title: SupplierDeliverFailureRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m])), 1)
+                  ) > ${FAILURE_RATE_HIGH:-0.10}
+                )
+                and
+                (
+                  sum by(name, appName)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} failure_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 供应商回执失败比例过高 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            30 分钟内失败比例超过 ${FAILURE_RATE_HIGH:-0.10}
+        labels:
+          severity: critical
+          category: delivery
+          alert_type: failure_rate_high
+
+      # 短期失败率激增告警 (用于快速检测突发问题)
+      - uid: supplier_deliver_failure_rate_surge
+        title: SupplierDeliverFailureRateSurge
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${SHORT_EVAL_SECONDS:-300}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                      /
+                      clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])), 1)
+                    )
+                    /
+                    clamp_min(
+                      (
+                        sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                        /
+                        clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m])), 1)
+                      ),
+                      0.01
+                    )
+                  ) > ${SURGE_FACTOR:-2}
+                )
+                and
+                (
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])), 1)
+                  ) > 0.05
+                )
+                and
+                (
+                  sum by(name, appName)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])
+                  ) >= ${MIN_BASELINE_SHORT:-30}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} failure_rate_surge"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${SHORT_EVAL_SECONDS:-300}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: 供应商回执失败率短时激增 ({{ $labels.name }} / {{ $labels.appName }})
+          description: |
+            5 分钟失败率相对 30 分钟失败率出现倍增（> ${SURGE_FACTOR:-2}x），且短窗失败率超过 5%。
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: failure_rate_surge
+
+      # 分国家/地区的失败率过高告警 (针对您提供的第二组指标)
+      - uid: supplier_deliver_failure_rate_country
+        title: SupplierDeliverFailureRateByCountry
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m])), 1)
+                  ) > ${FAILURE_RATE_HIGH:-0.10}
+                )
+                and
+                (
+                  sum by(name, appName, countryId)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{countryId}} failure_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 供应商回执失败比例过高 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})
+          description: |
+            30 分钟内特定国家/地区 {{ $labels.countryId }} 的失败比例超过 ${FAILURE_RATE_HIGH:-0.10}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: failure_rate_by_country
+          country_id: "{{ $labels.countryId }}"
+
+      # 分国家/地区的回执比例过低告警
+      - uid: supplier_deliver_rcpt_rate_low_country
+        title: SupplierDeliverReceiptRateLowByCountry
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  ) < ${DELIVERY_RATE_LOW:-0.85}
+                )
+                and
+                (
+                  sum by(name, appName, countryId)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{countryId}} receipt_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 供应商回执回执比例过低 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})
+          description: |
+            30 分钟内特定国家/地区 {{ $labels.countryId }} 的回执比例低于 ${DELIVERY_RATE_LOW:-0.85}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: receipt_rate_low_by_country
+          country_id: "{{ $labels.countryId }}"
+
+      # 分国家/地区的超时比例过高告警
+      - uid: supplier_deliver_tmo_rate_high_country
+        title: SupplierDeliverTimeoutRateHighByCountry
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  ) > ${TIMEOUT_RATE_HIGH:-0.15}
+                )
+                and
+                (
+                  sum by(name, appName, countryId)(
+                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
+                  ) >= ${MIN_BASELINE_COUNT:-100}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{countryId}} timeout_rate"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: ${DELIVER_EVAL_SECONDS:-1800}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 供应商回执超时比例过高 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})"
+          description: |
+            30 分钟内特定国家/地区 {{ $labels.countryId }} 的超时比例超过 ${TIMEOUT_RATE_HIGH:-0.15}，
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: timeout_rate_high_by_country
+          country_id: "{{ $labels.countryId }}"

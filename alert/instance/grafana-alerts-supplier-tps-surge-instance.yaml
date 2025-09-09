@@ -1,0 +1,940 @@
+# Grafana 供应商侧TPS激增告警配置
+# 使用说明：
+# 1. 替换 few51rsrq2ry8b 为你的Prometheus数据源UID（在Grafana设置->数据源中查看）
+# 2. 复制文件到Grafana provisioning目录（如 /etc/grafana/provisioning/alerting/）
+# 3. 重启或重新加载Grafana
+# 4. 告警将出现在"Business-Supplier-TPS-Surge"文件夹下
+
+# 环境变量配置（可在Grafana中设置或直接替换）：
+# - MIN_BASELINE_TPS: 基础TPS阈值，低于此值不触发告警（默认：100）
+# - BASELINE_WINDOW: 历史基线窗口（默认：30m）
+# - SHORT_WINDOW: 短时窗口（默认：3m）
+# - EVAL_FROM_SECONDS: 评估回看秒数，应 >= BASELINE_WINDOW 秒数（默认：1800为30分钟）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier TPS Surge Alerts
+    folder: Business-Supplier-TPS-Surge
+    interval: 1m
+    rules:
+      # ==================== 总量激增告警 ====================
+      
+      # 规则1：TPS激增30% - Warning级别
+      - uid: supplier_tps_surge_30_warning
+        title: 供应商侧TPS总量激增30%(Warning)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [30]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "提交给供应商的TPS总量激增≥30% (Warning)"
+          description: "当前提交给供应商的TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟"
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: total_surge
+
+      # 规则2：TPS激增50% - High级别
+      - uid: supplier_tps_surge_50_high
+        title: 供应商侧TPS总量激增50%(High)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [50]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "提交给供应商的TPS总量激增≥50% (High)"
+          description: "当前提交给供应商的TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟"
+        labels:
+          severity: high
+          category: business-supplier-tps-surge
+          alert_type: total_surge
+
+      # 规则3：TPS激增70% - Critical级别
+      - uid: supplier_tps_surge_70_critical
+        title: 供应商侧TPS总量激增70%(Critical)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [70]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "提交给供应商的TPS总量激增≥70% (Critical)"
+          description: "当前提交给供应商的TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟"
+        labels:
+          severity: critical
+          category: business-supplier-tps-surge
+          alert_type: total_surge
+
+      # ==================== 短时窗口激增告警 ====================
+      
+      # 规则4：短时窗口TPS激增 - 基于绝对值
+      - uid: supplier_tps_short_window_surge
+        title: 供应商侧TPS短时窗口激增(2-3分钟)
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+                and on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 100)
+                and on(name, appName) (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  > avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m]) * 1.5
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "当前TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [100]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: "提交给供应商的TPS短时窗口激增告警"
+          description: 当前提交给供应商的TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟"
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: short_window_surge
+
+      # ==================== 分组激增告警 ====================
+
+      # 规则5：按name+appName组合分组的激增告警30%
+      - uid: s_t_s_by_name_appname_30
+        title: 供应商侧TPS按供应商+应用组合分组激增30%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [30]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥30%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥30%，且基线≥20 TPS，持续3分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname
+
+      # 规则6：按name+appName组合分组的激增告警50%
+      - uid: s_t_s_by_name_appname_50
+        title: 供应商侧TPS按供应商+应用组合分组激增50%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [50]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥50%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥50%，且基线≥20 TPS，持续3分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname
+
+      # 规则7：按name+appName组合分组的激增告警70%
+      - uid: s_t_s_by_name_appname_70
+        title: 供应商侧TPS按供应商+应用组合分组激增70%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [70]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥70%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥70%，且基线≥20 TPS，持续3分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname
+
+      # 规则8：按分组的短时窗口激增告警
+      - uid: s_t_s_w_s_by_name_appname
+        title: 供应商侧TPS按供应商应用名称短时窗口激增
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+                and on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 30)
+                and on(name, appName) (
+                  sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  > avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m]) * 1.4
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name }}-{{appName }} 当前TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [30]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 提交给{{ $labels.name }}应用{{ $labels.appName }}供应商的短时窗口TPS激增
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS超过3m平均值的40%，且绝对值≥30 TPS，持续2分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_short_window_surge_by_name
+
+      # ==================== 三维聚类激增告警 (name + appName + connectId) ====================
+      
+      # 规则9：按三维分组(name+appName+connectId)的激增告警30%
+      - uid: s_t_s_b_name_appname_connectid_30
+        title: 供应商侧TPS按供应商+应用+通道三维分组激增30%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
+                  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 10)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [30]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥30%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥30%，且基线≥10 TPS，持续3分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname_connectid
+
+      # 规则10：按三维分组(name+appName+connectId)的激增告警50%
+      - uid: s_t_s_b_n_appname_connectid_50
+        title: 供应商侧TPS按供应商+应用+通道三维分组激增50%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
+                  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [50]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥50%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟
+        labels:
+          severity: high
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname_connectid
+
+      # 规则10：按三维分组(name+appName+connectId)的激增告警70%
+      - uid: s_t_s_by_name_appname_connectid_70
+        title: 供应商侧TPS按供应商+应用+通道三维分组激增70%
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                (
+                  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
+                  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
+                  - 1
+                ) * 100
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [70]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥70%
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥70%，且基线≥8 TPS，持续3分钟
+        labels:
+          severity: high
+          category: business-supplier-tps-surge
+          alert_type: grouped_surge_by_name_appname_connectid
+
+      # 规则11：按三维分组的短时窗口激增告警
+      - uid: s_t_s_w_surge_by_name_appname_connectid
+        title: 供应商侧TPS按供应商+应用+通道三维短时窗口激增
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: few51rsrq2ry8b
+            model:
+              datasource:
+                type: prometheus
+                uid: few51rsrq2ry8b
+              expr: |
+                sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+                and on(name, appName, connectId) (sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) >= 5)
+                and on(name, appName, connectId) (
+                  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+                > avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[3m:1m]) * 1.3
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [5]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的短时窗口TPS激增
+          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS超过3m平均值的30%，且绝对值≥5 TPS，持续2分钟
+        labels:
+          severity: warning
+          category: business-supplier-tps-surge
+          alert_type: grouped_short_window_surge_by_name_appname_connectid
