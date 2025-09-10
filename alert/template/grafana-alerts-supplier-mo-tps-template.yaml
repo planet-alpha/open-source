@@ -24,7 +24,7 @@ groups:
       # ======================= 激增(WARNING) =======================
       - uid: supplier_mo_tps_surge_warning
         title: SupplierMoTpsSurge(Warning)
-        condition: C
+        condition: D
         data:
           - refId: A
             relativeTimeRange:
@@ -44,7 +44,23 @@ groups:
                   *
                   sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}])[1h:${WINDOW:-5m}]))
                 )
-                and
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增(Warning)-倍率"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
                 (
                   sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}]))
                   >
@@ -52,27 +68,65 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Warning)"
+              legendFormat: "MO TPS 激增(Warning)-绝对值"
               maxDataPoints: 43200
               range: true
-              refId: A
+              refId: B
           - refId: C
             relativeTimeRange:
               from: ${EVAL_FROM_SECONDS:-600}
               to: 0
             datasourceUid: __expr__
             model:
-              conditions:
-                - evaluator: { params: [1], type: gt }
-                  operator: { type: and }
-                  query: { params: [A] }
-                  reducer: { type: last }
-                  type: query
               datasource: { type: __expr__, uid: __expr__ }
               expression: A
               intervalMs: 1000
               maxDataPoints: 43200
               refId: C
+              type: reduce
+              reducer: { type: last }
+          - refId: E
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: E
+              type: reduce
+              reducer: { type: last }
+          - refId: F
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: $C * $E
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: F
+              type: math
+          - refId: D
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [0], type: gt }
+                  operator: { type: and }
+                  query: { params: [F] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: F
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
               type: threshold
         noDataState: OK
         execErrState: Error
@@ -82,7 +136,6 @@ groups:
           description: |
             当前 5m TPS 明显高于 1h 基线。
             条件：倍率 ≥ ${SURGE_MULTIPLIER_WARN:-2} 且 绝对TPS > ${SURGE_ABSOLUTE_QPS_WARN:-10} QPS，持续 ${FOR_WARN_SURGE:-3m}。
-            可能原因：异常上行流量、循环上报、突发业务峰值。
         labels:
           severity: warning
           category: business-supplier-mo-tps
@@ -91,7 +144,7 @@ groups:
       # ======================= 激增(HIGH) =======================
       - uid: supplier_mo_tps_surge_high
         title: SupplierMoTpsSurge(High)
-        condition: C
+        condition: D
         data:
           - refId: A
             relativeTimeRange:
@@ -111,7 +164,23 @@ groups:
                   *
                   sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}])[1h:${WINDOW:-5m}]))
                 )
-                and
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增(High)-倍率"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
                 (
                   sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}]))
                   >
@@ -119,27 +188,65 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(High)"
+              legendFormat: "MO TPS 激增(High)-绝对值"
               maxDataPoints: 43200
               range: true
-              refId: A
+              refId: B
           - refId: C
             relativeTimeRange:
               from: ${EVAL_FROM_SECONDS:-600}
               to: 0
             datasourceUid: __expr__
             model:
-              conditions:
-                - evaluator: { params: [1], type: gt }
-                  operator: { type: and }
-                  query: { params: [A] }
-                  reducer: { type: last }
-                  type: query
               datasource: { type: __expr__, uid: __expr__ }
               expression: A
               intervalMs: 1000
               maxDataPoints: 43200
               refId: C
+              type: reduce
+              reducer: { type: last }
+          - refId: E
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: E
+              type: reduce
+              reducer: { type: last }
+          - refId: F
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: $C * $E
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: F
+              type: math
+          - refId: D
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [0], type: gt }
+                  operator: { type: and }
+                  query: { params: [F] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: F
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
               type: threshold
         noDataState: OK
         execErrState: Error
@@ -157,7 +264,7 @@ groups:
       # ======================= 激增(CRITICAL) =======================
       - uid: supplier_mo_tps_surge_critical
         title: SupplierMoTpsSurge(Critical)
-        condition: C
+        condition: D
         data:
           - refId: A
             relativeTimeRange:
@@ -177,7 +284,23 @@ groups:
                   *
                   sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}])[1h:${WINDOW:-5m}]))
                 )
-                and
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "MO TPS 激增(Critical)-倍率"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: ${DS_PROMETHEUS_UID}
+            model:
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS_UID}
+              editorMode: code
+              expr: |
                 (
                   sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[${WINDOW:-5m}]))
                   >
@@ -185,27 +308,65 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Critical)"
+              legendFormat: "MO TPS 激增(Critical)-绝对值"
               maxDataPoints: 43200
               range: true
-              refId: A
+              refId: B
           - refId: C
             relativeTimeRange:
               from: ${EVAL_FROM_SECONDS:-600}
               to: 0
             datasourceUid: __expr__
             model:
-              conditions:
-                - evaluator: { params: [1], type: gt }
-                  operator: { type: and }
-                  query: { params: [A] }
-                  reducer: { type: last }
-                  type: query
               datasource: { type: __expr__, uid: __expr__ }
               expression: A
               intervalMs: 1000
               maxDataPoints: 43200
               refId: C
+              type: reduce
+              reducer: { type: last }
+          - refId: E
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: E
+              type: reduce
+              reducer: { type: last }
+          - refId: F
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: $C * $E
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: F
+              type: math
+          - refId: D
+            relativeTimeRange:
+              from: ${EVAL_FROM_SECONDS:-600}
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [0], type: gt }
+                  operator: { type: and }
+                  query: { params: [F] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: F
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
               type: threshold
         noDataState: OK
         execErrState: Error
