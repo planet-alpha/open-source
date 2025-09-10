@@ -1,6 +1,6 @@
 # Grafana 供应商侧上行（MO）TPS 多级告警（Prometheus 数据源）
 # 使用说明：
-# 1) 本文件已将数据源 UID 设置为 few51rsrq2ry8b（与供应商侧 TPS 激增配置保持一致）。如需调整，请替换 datasourceUid/uid 字段。
+# 1) 本文件已将数据源 UID 设置为 P1809F7CD0C75ACF3（与供应商侧 TPS 激增配置保持一致）。如需调整，请替换 datasourceUid/uid 字段。
 # 2) 将文件放到 Grafana provisioning/alerting 目录并重启/重新加载 Grafana
 # 3) 告警会出现在 "Business-Supplier-MO-TPS" 文件夹下
 # 4) 可通过环境变量调整阈值（以下为默认值）：
@@ -30,11 +30,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -53,11 +53,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -148,11 +148,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -171,11 +171,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -266,11 +266,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -289,11 +289,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))

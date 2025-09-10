@@ -32,11 +32,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 # 计算回执下降比例(%)，相对30m动态基线，并应用双门槛过滤

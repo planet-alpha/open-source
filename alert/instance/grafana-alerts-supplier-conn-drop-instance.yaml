@@ -28,11 +28,11 @@ groups:
             relativeTimeRange:
               from: 180
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 sum by (name, appName) (
@@ -50,11 +50,11 @@ groups:
             relativeTimeRange:
               from: 180
               to: 0
-            datasourceUid: few51rsrq2ry8b
+            datasourceUid: P1809F7CD0C75ACF3
             model:
               datasource:
                 type: prometheus
-                uid: few51rsrq2ry8b
+                uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
                 avg by (name, appName) (
