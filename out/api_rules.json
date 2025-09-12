@@ -1,0 +1,3165 @@
+[
+  {
+    "title": "SupplierAppConnectionsDropNotRecovered1m",
+    "ruleGroup": "Supplier App Connection Alerts",
+    "folder": "Business-Supplier-App-Connections",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "supplier_app_conn_drop_not_recovered_1m",
+    "condition": "E",
+    "annotations": {
+      "summary": "供应商{{ $labels.name }}应用{{ $labels.appName }}连接数异常",
+      "description": "【故障影响】供应商应用连接数与 total 基线不相等已持续 2 分钟，现已触发报警\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-app-connections",
+      "alert_type": "connection_drop"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 180,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by (name, appName) (\n  online_supplier_app{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "实际 sum (name, appName)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 180,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "avg by (name, appName) (\n  online_supplier_app{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", total=~\".*\"}\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "基线 total avg (name, appName)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 180,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "abs($A - $B)",
+          "type": "math"
+        },
+        "intervalMs": 1000,
+        "maxDataPoints": 43200
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 180,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "type": "reduce",
+          "reducer": "last"
+        },
+        "intervalMs": 1000,
+        "maxDataPoints": 43200
+      },
+      {
+        "refId": "E",
+        "relativeTimeRange": {
+          "from": 180,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "D"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "D",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "E",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverReceiptRateLow",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "sdr_rate_low",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执比例过低 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "30 分钟内回执比例低于 85%"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "receipt_rate_low"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName)(rate(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[30m])), 1)\n  ) < 0.85\n)\nand\n(\n  sum by(name, appName)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} receipt_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverTimeoutRateHigh",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "sdt_rate_high",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执超时比例过高 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "30 分钟内超时比例超过 15%\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "timeout_rate_high"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat=~\"^timeout$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[30m])), 1)\n  ) > 0.15\n)\nand\n(\n  sum by(name, appName)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} timeout_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverSuccessRateLow",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "sd_success_rate_low",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执成功比例过低 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "30 分钟内成功比例(DELIVRD|ACCEPTD)低于 90%\n"
+    },
+    "labels": {
+      "severity": "critical",
+      "category": "delivery",
+      "alert_type": "success_rate_low"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m])), 1)\n  ) < 0.90\n)\nand\n(\n  sum by(name, appName)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} success_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverFailureRateHigh",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "sd_failure_rate_high",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执失败比例过高 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "30 分钟内失败比例超过 10%"
+    },
+    "labels": {
+      "severity": "critical",
+      "category": "delivery",
+      "alert_type": "failure_rate_high"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m])), 1)\n  ) > 0.10\n)\nand\n(\n  sum by(name, appName)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} failure_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverFailureRateSurge",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "0m",
+    "orgId": 1,
+    "uid": "sd_failure_rate_surge",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执失败率短时激增 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "5 分钟失败率相对 30 分钟失败率出现倍增（> 2x），且短窗失败率超过 5%。\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "failure_rate_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    (\n      sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[5m]))\n      /\n      clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[5m])), 1)\n    )\n    /\n    clamp_min(\n      (\n        sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[30m]))\n        /\n        clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[30m])), 1)\n      ),\n      0.01\n    )\n  ) > 2\n)\nand\n(\n  (\n    sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[5m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[5m])), 1)\n  ) > 0.05\n)\nand\n(\n  sum by(name, appName)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[5m])\n  ) >= 30\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} failure_rate_surge",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverFailureRateByCountry",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "sd_failure_rate_by_country",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执失败比例过高 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})",
+      "description": "30 分钟内特定国家/地区的失败比例超过 10%\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "failure_rate_by_country",
+      "country_id": "{{ $labels.countryId }}"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\", stat!~\"^timeout$\"}[30m])), 1)\n  ) > 0.10\n)\nand\n(\n  sum by(name, appName, countryId)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\", stat!~\"^timeout$\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{countryId}} failure_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverReceiptRateLowByCountry",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "sd_receipt_r_low_by_country",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执回执比例过低 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})",
+      "description": "30 分钟内特定国家/地区的回执比例低于 85%\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "receipt_rate_low_by_country",
+      "country_id": "{{ $labels.countryId }}"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\", stat!~\"^timeout$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\"}[30m])), 1)\n  ) < 0.85\n)\nand\n(\n  sum by(name, appName, countryId)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{countryId}} receipt_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierDeliverTimeoutRateHighByCountry",
+    "ruleGroup": "Supplier Deliver Alerts",
+    "folder": "Business-Delivery",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "sdt_rate_high_by_country",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执超时比例过高 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})",
+      "description": "30 分钟内特定国家/地区的超时比例超过 15%\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "delivery",
+      "alert_type": "timeout_rate_high_by_country",
+      "country_id": "{{ $labels.countryId }}"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  (\n    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\", stat=~\"^timeout$\"}[30m]))\n    /\n    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\"}[30m])), 1)\n  ) > 0.15\n)\nand\n(\n  sum by(name, appName, countryId)(\n    increase(supplier_deliver_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", countryId=~\".*\"}[30m])\n  ) >= 100\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{countryId}} timeout_rate",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierLatencyP95High",
+    "ruleGroup": "Supplier Latency Alerts",
+    "folder": "Business-Latency",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "5m",
+    "orgId": 1,
+    "uid": "supplier_latency_p95_high",
+    "condition": "C",
+    "annotations": {
+      "summary": "供应商侧 p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "最近 5 分钟内，供应商侧 p95 请求耗时超过阈值 600 ms。"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "latency",
+      "alert_type": "supplier_latency_p95"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(\n  0.95,\n  sum(rate(supplier_request_duration_ms_bucket{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}[5m]))\n  by (le, name, appName)\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} p95",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  600
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierLatencyP99High",
+    "ruleGroup": "Supplier Latency Alerts",
+    "folder": "Business-Latency",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "5m",
+    "orgId": 1,
+    "uid": "supplier_latency_p99_high",
+    "condition": "C",
+    "annotations": {
+      "summary": "供应商侧 p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "最近 5 分钟内，供应商侧 p99 请求耗时超过阈值 1200 ms。"
+    },
+    "labels": {
+      "severity": "critical",
+      "category": "latency",
+      "alert_type": "supplier_latency_p99"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(\n  0.99,\n  sum(rate(supplier_request_duration_ms_bucket{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}[5m]))\n  by (le, name, appName)\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} p99",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  1200
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierLatencyAvgHigh",
+    "ruleGroup": "Supplier Latency Alerts",
+    "folder": "Business-Latency",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "10m",
+    "orgId": 1,
+    "uid": "supplier_latency_avg_high",
+    "condition": "C",
+    "annotations": {
+      "summary": "供应商侧平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})",
+      "description": "最近 10 分钟内，供应商侧平均请求耗时超过阈值 400 ms。\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "latency",
+      "alert_type": "supplier_latency_avg"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "(\n  rate(supplier_request_duration_ms_sum{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}[5m])\n  /\n  rate(supplier_request_duration_ms_count{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}[5m])\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} avg",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  400
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierMoTpsSurge(Warning)",
+    "ruleGroup": "Supplier MO TPS Alerts",
+    "folder": "Business-Supplier-MO-TPS",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "supplier_mo_tps_surge_warning",
+    "condition": "D",
+    "annotations": {
+      "summary": "MO TPS 激增(Warning) - 供应商：{{ $labels.name }}/{{ $labels.appName }}",
+      "description": "当前 5m TPS 明显高于 1h 基线。\n条件：倍率 ≥ 2 且 绝对TPS > 10 QPS，持续 3m。\n"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-mo-tps",
+      "alert_type": "tps_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n2\n*\nsum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m])[1h:5m]))\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(Warning) - 倍率",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n10\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(Warning) - 绝对值",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "E",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "E",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "F",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$C * $E",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "F",
+          "type": "math"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "F"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "F",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierMoTpsSurge(High)",
+    "ruleGroup": "Supplier MO TPS Alerts",
+    "folder": "Business-Supplier-MO-TPS",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "5m",
+    "orgId": 1,
+    "uid": "supplier_mo_tps_surge_high",
+    "condition": "D",
+    "annotations": {
+      "summary": "MO TPS 激增(High) - 供应商：{{ $labels.name }}/{{ $labels.appName }}",
+      "description": "当前 5m TPS 显著高于 1h 基线。\n条件：倍率 ≥ 3 且 绝对TPS > 20 QPS，持续 5m。\n"
+    },
+    "labels": {
+      "severity": "high",
+      "category": "business-supplier-mo-tps",
+      "alert_type": "tps_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n3\n*\nsum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m])[1h:5m]))\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(High) - 倍率",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n20\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(High) - 绝对值",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "E",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "E",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "F",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$C * $E",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "F",
+          "type": "math"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "F"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "F",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierMoTpsSurge(Critical)",
+    "ruleGroup": "Supplier MO TPS Alerts",
+    "folder": "Business-Supplier-MO-TPS",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "5m",
+    "orgId": 1,
+    "uid": "supplier_mo_tps_surge_critical",
+    "condition": "D",
+    "annotations": {
+      "summary": "MO TPS 激增(Critical) - 供应商：{{ $labels.name }}/{{ $labels.appName }}",
+      "description": "当前 5m TPS 远高于 1h 基线。\n条件：倍率 ≥ 5 且 绝对TPS > 50 QPS，持续 5m。\n"
+    },
+    "labels": {
+      "severity": "critical",
+      "category": "business-supplier-mo-tps",
+      "alert_type": "tps_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n5\n*\nsum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m])[1h:5m]))\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(Critical) - 倍率",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "sum by(name, appName)(rate(supplier_mo_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[5m]))\n>\nbool\n50\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "MO TPS 激增(Critical) - 绝对值",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "E",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "E",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "F",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$C * $E",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "F",
+          "type": "math"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 600,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  0
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "F"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "F",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "SupplierReceiptDropRate",
+    "ruleGroup": "Supplier Submit Response Receipt Drop Alerts",
+    "folder": "Business-Supplier-Receipt",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "supplier_receipt_drop_rate",
+    "condition": "D",
+    "annotations": {
+      "summary": "供应商回执下降率异常",
+      "description": "供应商 {{ $labels.name }}/{{ $labels.appName }} 的回执下降率异常"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-receipt",
+      "alert_type": "receipt_drop_rate"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "# 计算回执下降比例(%)，相对30m动态基线，并应用双门槛过滤\nclamp_min(\n  (\n    # R_base: 30m基线回执比例(%)\n    100 * avg_over_time((\n      sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))\n      /\n      clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[1m])), 1)\n    )[30m:1m])\n    \n    -\n    \n    # R_cur: 当前1m回执比例(%)\n    100 * (\n      sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))\n      /\n      clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[1m])), 1)\n    )\n  )\n  /\n  # 除以基线比例，得到相对下降比例\n  100 * avg_over_time((\n    sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[1m])), 1)\n  )[30m:1m])\n  * 100, 0\n)\nand (\n  # 绝对下降门槛：30m内1m回执数均值 - 当前1m回执数 >= MIN_ABS_DROP\n  avg_over_time(sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))[30m:1m])\n  -\n  sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))\n  >= 10\n)\nand (\n  # 总量基线门槛：30m内1m非超时总量的均值 >= MIN_BASELINE_TOTAL\n  avg_over_time(sum by(name, appName)(increase(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[1m]))[30m:1m]) >= 100\n)\nand (\n  # 基线回执比例必须大于0，避免除零错误\n  100 * avg_over_time((\n    sum by(name, appName)(increase(supplier_submit_resp_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\"}[1m]))\n    /\n    clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", stat!~\"^timeout$\"}[1m])), 1)\n  )[30m:1m]) > 0\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}下降比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "reduce"
+        }
+      },
+      {
+        "refId": "D",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  5
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "C"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "C",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "D",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS总量激增30%(Warning)",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "supplier_tps_surge_30_warning",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给供应商的TPS总量激增≥30% (Warning)",
+      "description": "当前提交给供应商的TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "total_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 100)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  30
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS总量激增50%(High)",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "supplier_tps_surge_50_high",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给供应商的TPS总量激增≥50% (High)",
+      "description": "当前提交给供应商的TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "high",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "total_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 100)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  50
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS总量激增70%(Critical)",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "supplier_tps_surge_70_critical",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给供应商的TPS总量激增≥70% (Critical)",
+      "description": "当前提交给供应商的TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "critical",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "total_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 100)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  70
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS短时窗口激增(2-3分钟)",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "supplier_tps_short_window_surge",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给供应商的TPS短时窗口激增告警",
+      "description": "当前提交给供应商的TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟\""
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "short_window_surge"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))\nand on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) >= 100)\nand on(name, appName) (\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  > avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[3m:1m]) * 1.5\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "当前TPS",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  100
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用组合分组激增30%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_by_name_appname_30",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥30%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥30%，且基线≥20 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 20)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  30
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用组合分组激增50%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_by_name_appname_50",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥50%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥50%，且基线≥20 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 20)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  50
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用组合分组激增70%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_by_name_appname_70",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥70%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥70%，且基线≥20 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[30m:1m]) >= 20)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  70
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商应用名称短时窗口激增",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "s_t_s_w_s_by_name_appname",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}应用{{ $labels.appName }}供应商的短时窗口TPS激增",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS超过3m平均值的40%，且绝对值≥30 TPS，持续2分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_short_window_surge_by_name"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))\nand on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) >= 30)\nand on(name, appName) (\n  sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m])) \n  > avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\"}[1m]))[3m:1m]) * 1.4\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name }}-{{appName }} 当前TPS",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  30
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用+通道三维分组激增30%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_b_name_appname_connectid_30",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥30%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥30%，且基线≥10 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname_connectid"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m])) \n  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) >= 10)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{connectId}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  30
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用+通道三维分组激增50%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_b_n_appname_connectid_50",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥50%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "high",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname_connectid"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m])) \n  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) >= 8)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{connectId}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  50
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用+通道三维分组激增70%",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "3m",
+    "orgId": 1,
+    "uid": "s_t_s_by_name_appname_connectid_70",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥70%",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥70%，且基线≥8 TPS，持续3分钟"
+    },
+    "labels": {
+      "severity": "high",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_surge_by_name_appname_connectid"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 1800,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "(\n  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m])) \n  / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) \n  - 1\n) * 100\nand on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[30m:1m]) >= 8)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{connectId}} 激增比例(%)",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  70
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  },
+  {
+    "title": "供应商侧TPS按供应商+应用+通道三维短时窗口激增",
+    "ruleGroup": "Supplier TPS Surge Alerts",
+    "folder": "Business-Supplier-TPS-Surge",
+    "groupInterval": "1m",
+    "noDataState": "OK",
+    "execErrState": "Error",
+    "for": "2m",
+    "orgId": 1,
+    "uid": "s_t_s_w_surge_by_name_appname_connectid",
+    "condition": "C",
+    "annotations": {
+      "summary": "提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的短时窗口TPS激增",
+      "description": "提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS超过3m平均值的30%，且绝对值≥5 TPS，持续2分钟"
+    },
+    "labels": {
+      "severity": "warning",
+      "category": "business-supplier-tps-surge",
+      "alert_type": "grouped_short_window_surge_by_name_appname_connectid"
+    },
+    "data": [
+      {
+        "refId": "A",
+        "relativeTimeRange": {
+          "from": 300,
+          "to": 0
+        },
+        "datasourceUid": "P1809F7CD0C75ACF3",
+        "model": {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))\nand on(name, appName, connectId) (sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m])) >= 5)\nand on(name, appName, connectId) (\n  sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))\n> avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", stat=\"0\", connectId=~\".*\"}[1m]))[3m:1m]) * 1.3\n)\n",
+          "interval": "",
+          "intervalMs": 1000,
+          "legendFormat": "{{name}}-{{appName}}-{{connectId}} 当前TPS",
+          "maxDataPoints": 43200,
+          "range": true,
+          "refId": "A"
+        }
+      },
+      {
+        "refId": "B",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "A",
+          "reducer": "last",
+          "settings": {
+            "mode": ""
+          },
+          "type": "reduce",
+          "refId": "B"
+        }
+      },
+      {
+        "refId": "C",
+        "relativeTimeRange": {
+          "to": 0
+        },
+        "datasourceUid": "__expr__",
+        "model": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [
+                  5
+                ],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": [
+                  "B"
+                ]
+              },
+              "reducer": {
+                "type": "last"
+              },
+              "type": "query"
+            }
+          ],
+          "datasource": {
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "B",
+          "intervalMs": 1000,
+          "maxDataPoints": 43200,
+          "refId": "C",
+          "type": "threshold"
+        }
+      }
+    ]
+  }
+]
