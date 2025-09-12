@@ -1,4 +1,4 @@
-import os
+·import os
 import sys
 import json
 import time
@@ -17,7 +17,7 @@ API_RULES_PATH = os.path.join(BASE_DIR, 'out', 'api_rules.json')
 # 默认目标Grafana
 DEFAULT_BASE_URL = os.environ.get('GRAFANA_URL', 'https://monitor-test.planet-alpha.net/')
 DEFAULT_USER = os.environ.get('GRAFANA_USER', 'admin')
-DEFAULT_PASSWORD = os.environ.get('GRAFANA_PASSWORD', 'pa@2025')
+DEFAULT_PASSWORD = os.environ.get('GRAFANA_PASSWORD', '')
 API_TOKEN = os.environ.get('GRAFANA_API_TOKEN')
 VERIFY_ENV = os.environ.get('GRAFANA_VERIFY', 'true').lower()
 CA_CERT_PATH = os.environ.get('GRAFANA_CA_CERT')

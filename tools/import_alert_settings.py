@@ -40,7 +40,7 @@ NOTIFICATION_POLICIES_API = 'api/v1/provisioning/policies'
 # 环境变量（与规则导入脚本保持一致）
 DEFAULT_BASE_URL = os.environ.get('GRAFANA_URL', 'https://monitor-test.planet-alpha.net/')
 DEFAULT_USER = os.environ.get('GRAFANA_USER', 'admin')
-DEFAULT_PASSWORD = os.environ.get('GRAFANA_PASSWORD', 'pa@2025')
+DEFAULT_PASSWORD = os.environ.get('GRAFANA_PASSWORD', '')
 REQ_TIMEOUT = float(os.environ.get('GRAFANA_TIMEOUT', '60'))
 
 
