@@ -87,7 +87,10 @@ groups:
         for: 5m
         annotations:
           summary: 供应商侧 p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
-          description: 最近 5 分钟内，供应商侧 p95 请求耗时超过阈值 600 ms。
+          description: |
+            最近 5 分钟内，供应商侧 p95 请求耗时超过阈值 600 ms。
+            当前供应商侧 p95 请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
+            
         labels:
           severity: warning
           category: latency
@@ -163,7 +166,9 @@ groups:
         for: 5m
         annotations:
           summary: 供应商侧 p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})
-          description: 最近 5 分钟内，供应商侧 p99 请求耗时超过阈值 1200 ms。
+          description: |
+            最近 5 分钟内，供应商侧 p99 请求耗时超过阈值 600 ms。
+            当前供应商侧 p99 请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
         labels:
           severity: critical
           category: latency
@@ -240,7 +245,8 @@ groups:
         annotations:
           summary: 供应商侧平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
           description: |
-            最近 10 分钟内，供应商侧平均请求耗时超过阈值 400 ms。
+            最近 5 分钟内，供应商侧平均请求耗时超过阈值 600 ms。
+            当前供应商侧平均请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
         labels:
           severity: warning
           category: latency

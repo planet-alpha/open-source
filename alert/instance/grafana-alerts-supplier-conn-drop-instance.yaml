@@ -35,12 +35,12 @@ groups:
                 uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
-                sum by (name, appName) (
+                sum by (name, appName,cId,appId) (
                   online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "实际 sum (name, appName)"
+              legendFormat: "实际 sum ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -57,12 +57,12 @@ groups:
                 uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
-                avg by (name, appName) (
+                avg by (name, appName,cId,appId) (
                   online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "基线 total avg (name, appName)"
+              legendFormat: "基线 total avg ({{name}}-{{cId}}, {{appName}}-{{appId}}))"
               maxDataPoints: 43200
               range: true
               refId: B
@@ -93,6 +93,38 @@ groups:
                 type: __expr__
                 uid: __expr__
               expression: C
+              type: reduce
+              reducer: last
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # F: 将 A 归约为单值（last），用于注解显示
+          - refId: F
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              type: reduce
+              reducer: last
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # G: 将 B 归约为单值（last），用于注解显示
+          - refId: G
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
               type: reduce
               reducer: last
             intervalMs: 1000
@@ -129,9 +161,10 @@ groups:
         # for: 2m 表示条件需持续为真至少 2 分钟，等价于“连续两分钟不相等，第三分钟触发”
         for: 2m
         annotations:
-          summary: 供应商{{ $labels.name }}应用{{ $labels.appName }}连接数异常
+          summary: 供应商{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }}连接数异常
           description: |
             【故障影响】供应商应用连接数与 total 基线不相等已持续 2 分钟，现已触发报警
+            【当前值】 实际连接数={{ $values.F.Value }}，标准连接数={{ $values.G.Value }}
         labels:
           severity: warning
           category: business-supplier-app-connections

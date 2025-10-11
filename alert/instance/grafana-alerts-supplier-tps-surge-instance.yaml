@@ -62,6 +62,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -91,7 +153,9 @@ groups:
         for: 3m
         annotations:
           summary: "提交给供应商的TPS总量激增≥30% (Warning)"
-          description: "当前提交给供应商的TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟"
+          description: |
+            当前提交给供应商的TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -138,6 +202,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -167,7 +293,9 @@ groups:
         for: 3m
         annotations:
           summary: "提交给供应商的TPS总量激增≥50% (High)"
-          description: "当前提交给供应商的TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟"
+          description: |
+            当前提交给供应商的TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
         labels:
           severity: high
           category: business-supplier-tps-surge
@@ -214,6 +342,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -243,7 +433,9 @@ groups:
         for: 3m
         annotations:
           summary: "提交给供应商的TPS总量激增≥70% (Critical)"
-          description: "当前提交给供应商的TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟"
+          description: |
+            当前提交给供应商的TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
         labels:
           severity: critical
           category: business-supplier-tps-surge
@@ -292,6 +484,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 3m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -321,7 +575,9 @@ groups:
         for: 2m
         annotations:
           summary: "提交给供应商的TPS短时窗口激增告警"
-          description: 当前提交给供应商的TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟"
+          description: |
+            当前提交给供应商的TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -370,6 +626,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -399,7 +717,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥30%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥30%，且基线≥20 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥30%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥20 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -446,6 +767,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -475,7 +858,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥50%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥50%，且基线≥20 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥50%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥20 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -522,6 +908,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -551,7 +999,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥70%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS相对30m基线激增≥70%，且基线≥20 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥70%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥20 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -598,6 +1049,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 3m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -627,7 +1140,10 @@ groups:
         for: 2m
         annotations:
           summary: 提交给{{ $labels.name }}应用{{ $labels.appName }}供应商的短时窗口TPS激增
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}供应商的TPS超过3m平均值的40%，且绝对值≥30 TPS，持续2分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS超过3m平均值40%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 绝对值≥30 TPS，持续2分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -676,6 +1192,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -705,7 +1283,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥30%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥30%，且基线≥10 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥30%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥10 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -752,6 +1333,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -781,7 +1424,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥50%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥50%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥8 TPS，持续3分钟
         labels:
           severity: high
           category: business-supplier-tps-surge
@@ -828,6 +1474,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -857,7 +1565,10 @@ groups:
         for: 3m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥70%
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS相对30m基线激增≥70%，且基线≥8 TPS，持续3分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥70%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 基线≥8 TPS，持续3分钟
         labels:
           severity: high
           category: business-supplier-tps-surge
@@ -904,6 +1615,68 @@ groups:
                 mode: ""
               type: reduce
               refId: B
+          - refId: R
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              expr: |
+                avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[3m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}}-{{connectId}} 3m平均1mTPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: C
             relativeTimeRange:
               to: 0
@@ -933,7 +1706,10 @@ groups:
         for: 2m
         annotations:
           summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的短时窗口TPS激增
-          description: 提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}供应商的TPS超过3m平均值的30%，且绝对值≥5 TPS，持续2分钟
+          description: |-
+            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS超过3m平均值30%
+            当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
+            条件: 绝对值≥5 TPS，持续2分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge

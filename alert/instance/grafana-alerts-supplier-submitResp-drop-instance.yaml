@@ -92,6 +92,156 @@ groups:
               maxDataPoints: 43200
               range: true
               refId: A
+
+          # E: 30m基线回执比例(%)
+          - refId: E
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                100 * avg_over_time((
+                  sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                )[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 基线比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: E
+          - refId: F
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: E
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: F
+              type: reduce
+
+          # G: 当前1m回执比例(%)
+          - refId: G
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                100 * (
+                  sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前比例(%)"
+              maxDataPoints: 43200
+              range: true
+              refId: G
+          - refId: H
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: G
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: H
+              type: reduce
+
+          # I: 绝对下降值（回执数）
+          - refId: I
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                avg_over_time(sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))[30m:1m])
+                -
+                sum by(name, appName)(increase(supplier_submit_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 绝对下降数"
+              maxDataPoints: 43200
+              range: true
+              refId: I
+          - refId: J
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: I
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: J
+              type: reduce
+
+          # K: 30m基线非超时提交总量
+          - refId: K
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                avg_over_time(sum by(name, appName)(increase(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 基线总量"
+              maxDataPoints: 43200
+              range: true
+              refId: K
+          - refId: L
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: K
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: L
+              type: reduce
           
           # C: 数据聚合——对A的时间序列数据进行reduce操作
           - refId: C
@@ -141,7 +291,14 @@ groups:
         for: 3m
         annotations:
           summary: 供应商回执下降率异常
-          description: 供应商 {{ $labels.name }}/{{ $labels.appName }} 的回执下降率异常
+          description: |
+            供应商 {{ $labels.name }}/{{ $labels.appName }} 的回执下降率异常
+            当前值：
+              - 30m基线回执比例(%)：{{ $values.F.Value | printf "%.2f" }}
+              - 当前1m回执比例(%)：{{ $values.H.Value | printf "%.2f" }}
+              - 相对下降比例(%)：{{ $values.C.Value | printf "%.2f" }}
+              - 30m内1m回执数均值：{{ $values.J.Value | printf "%.0f" }}
+              - 30m内1m非超时提交总量均值：{{ $values.L.Value | printf "%.0f" }}
         labels:
           severity: warning
           category: business-supplier-receipt

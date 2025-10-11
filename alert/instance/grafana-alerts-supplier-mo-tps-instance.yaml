@@ -7,9 +7,9 @@
 #    - WINDOW：平滑窗口，默认 5m
 #    - EVAL_FROM_SECONDS：评估回看秒数，默认 600（10 分钟）
 #    - SURGE_MULTIPLIER_WARN/HIGH/CRIT：激增倍率阈值，默认 2/3/5
-#    - SURGE_ABSOLUTE_QPS_WARN/HIGH/CRIT：激增绝对 QPS 阈值，默认 10/20/50
+#    - SURGE_ABSOLUTE_TPS_WARN/HIGH/CRIT：激增绝对 TPS 阈值，默认 10/20/50
 #    - DROP_MULTIPLIER_WARN/HIGH/CRIT：骤降倍率阈值，默认 0.5/0.3/0.1
-#    - BASELINE_MIN_QPS：基线最低 QPS（骤降需满足），默认 5
+#    - BASELINE_MIN_TPS：基线最低 TPS（骤降需满足），默认 5
 #    - FOR_WARN_SURGE/FOR_HIGH_SURGE/FOR_CRIT_SURGE：激增 for 时长，默认 3m/5m/5m
 #    - FOR_WARN_DROP/FOR_HIGH_DROP/FOR_CRIT_DROP：骤降 for 时长，默认 5m/10m/15m
 
@@ -96,6 +96,72 @@ groups:
               maxDataPoints: 43200
               refId: E
               type: reduce
+          - refId: R
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 当前MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: F
             relativeTimeRange:
               from: 600
@@ -133,7 +199,8 @@ groups:
           summary: MO TPS 激增(Warning) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
           description: |
             当前 5m TPS 明显高于 1h 基线。
-            条件：倍率 ≥ 2 且 绝对TPS > 10 QPS，持续 3m。
+            当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。
+            条件：倍率 ≥ 2 且 绝对TPS > 10 TPS，持续 3m。
         labels:
           severity: warning
           category: business-supplier-mo-tps
@@ -214,6 +281,72 @@ groups:
               maxDataPoints: 43200
               refId: E
               type: reduce
+          - refId: R
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 5m窗口MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: F
             relativeTimeRange:
               from: 600
@@ -251,7 +384,8 @@ groups:
           summary: MO TPS 激增(High) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
           description: |
             当前 5m TPS 显著高于 1h 基线。
-            条件：倍率 ≥ 3 且 绝对TPS > 20 QPS，持续 5m。
+            当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。
+            条件：倍率 ≥ 3 且 绝对TPS > 20 TPS，持续 5m。
         labels:
           severity: high
           category: business-supplier-mo-tps
@@ -332,6 +466,72 @@ groups:
               maxDataPoints: 43200
               refId: E
               type: reduce
+          - refId: R
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 5m窗口MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: R
+          - refId: T
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              maxDataPoints: 43200
+              range: true
+              refId: T
+          - refId: RR
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR
+              type: reduce
+          - refId: TT
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: TT
+              type: reduce
           - refId: F
             relativeTimeRange:
               from: 600
@@ -369,7 +569,8 @@ groups:
           summary: MO TPS 激增(Critical) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
           description: |
             当前 5m TPS 远高于 1h 基线。
-            条件：倍率 ≥ 5 且 绝对TPS > 50 QPS，持续 5m。
+            当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。
+            条件：倍率 ≥ 5 且 绝对TPS > 50 TPS，持续 5m。
         labels:
           severity: critical
           category: business-supplier-mo-tps
