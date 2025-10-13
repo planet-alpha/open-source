@@ -1,0 +1,236 @@
+# Grafana 客户侧交付质量告警配置（Prometheus 数据源）
+# 说明：
+# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-Deliver-Quality" 文件夹下
+# 4) 环境变量（可在 Grafana 中设置或直接替换本文内变量）：
+#    - WINDOW：平滑监控窗口，默认 5m（用于 reduce noise，建议 >= 4x scrape_interval）
+#    - EVAL_FROM_SECONDS：评估回看秒数（默认：600 秒）
+#    - FOR_DURATION：告警持续判定时长（默认：5m）
+#    - MIN_BASELINE_TOTAL：基线总量阈值，低于该值不触发（默认：100；设为 0 表示无门槛，相当于禁用基线检查）
+#    - FAIL_PCT_THRESHOLD：失败比例阈值(%)，默认：1
+#    - TIMEOUT_PCT_THRESHOLD：超时比例阈值(%)，默认：2
+#    - RECEIPT_PCT_LOW：回执比例下限(%)，默认：99.5
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer Deliver Quality Alerts
+    folder: Business-Customer-Deliver-Quality
+    interval: 1m
+    rules:
+      # ================================= 失败比例升高 =================================
+      - uid: deliver_fail_rate_high
+        title: CustomerDeliverFailRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 失败比例(%) = 100 * fail / non_timeout
+                # 分组仅按 (name, appName,cId,appId)，保留模板变量
+                (
+                  100 * (
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])), 1)
+                  )
+                )
+                and (
+                  # 基线去噪：总量 >= MIN_BASELINE_TOTAL；当 MIN_BASELINE_TOTAL=0 时恒为真，相当于禁用基线检查
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 失败比例(%)"
+              maxDataPoints: 43200
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 失败比例 ≥ 1%"
+          description: |
+            当前失败比例：{{ printf "%.2f" $values.A.Value }}%。
+        labels:
+          severity: warning
+          category: business-deliver-quality
+          alert_type: fail_rate
+
+      # ================================= 超时比例升高 =================================
+      - uid: deliver_timeout_rate_high
+        title: CustomerDeliverTimeoutRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 超时比例(%) = 100 * timeout / total
+                (
+                  100 * (
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  )
+                )
+                and (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 超时比例(%)"
+              maxDataPoints: 43200
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [2]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 超时比例 ≥ 2%"
+          description: |
+            当前超时比例：{{ printf "%.2f" $values.A.Value }}%
+        labels:
+          severity: warning
+          category: business-deliver-quality
+          alert_type: timeout_rate
+
+      # ================================= 回执比例过低 =================================
+      - uid: deliver_receipt_rate_low
+        title: CustomerDeliverReceiptRateLow
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 回执比例(%) = 100 * non_timeout / total
+                (
+                  100 * (
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  )
+                )
+                and (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 回执比例(%)"
+              maxDataPoints: 43200
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [99.5]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 回执比例 ≤ 99.5%"
+          description: |
+            当前回执比例：{{ printf "%.2f" $values.A.Value }}%
+        labels:
+          severity: warning
+          category: business-deliver-quality
+          alert_type: receipt_rate

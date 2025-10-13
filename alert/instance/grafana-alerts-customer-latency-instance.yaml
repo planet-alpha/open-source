@@ -1,0 +1,258 @@
+﻿# Grafana 客户侧请求耗时（p95/p99/平均）告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警将出现在 "Business-Latency" 文件夹下
+# 4) 可通过环境变量定制阈值或评估窗口：
+#    - P95_MS_THRESHOLD: p95 延迟阈值（毫秒，默认：500）
+#    - P99_MS_THRESHOLD: p99 延迟阈值（毫秒，默认：1000）
+#    - AVG_MS_THRESHOLD: 平均延迟阈值（毫秒，默认：300）
+#    - EVAL_FROM_SECONDS: 评估回看秒数（默认：300 秒，即 5 分钟）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer Latency Alerts
+    folder: Business-Latency
+    interval: 1m
+    rules:
+      # p95 延迟预警（warning）
+      - uid: customer_latency_p95_high
+        title: CustomerLatencyP95High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                histogram_quantile(
+                  0.95,
+                  sum(rate(customer_request_duration_ms_bucket{cId!="", name!="", appId!="", appName!="", protocol!=""}[5m]))
+                  by (le, cId, name, appId, appName, protocol)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} p95"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [500]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})"
+          description: |
+            最近 5 分钟内，p95 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 500 ms。
+            请检查服务依赖、数据库慢查询、下游依赖及资源瓶颈。
+        labels:
+          severity: warning
+          category: latency
+          alert_type: latency_p95
+
+      # p99 延迟严重告警（critical）
+      - uid: customer_latency_p99_high
+        title: CustomerLatencyP99High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                histogram_quantile(
+                  0.99,
+                  sum(rate(customer_request_duration_ms_bucket{cId!="", name!="", appId!="", appName!="", protocol!=""}[5m]))
+                  by (le, cId, name, appId, appName, protocol)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} p99"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1000]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})"
+          description: |
+            最近 5 分钟内，p99 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 1000 ms。
+            影响用户的长尾延迟显著升高，请尽快排查。
+        labels:
+          severity: critical
+          category: latency
+          alert_type: latency_p99
+
+      # 平均耗时预警（warning）
+      - uid: customer_latency_avg_high
+        title: CustomerLatencyAvgHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  sum(rate(customer_request_duration_ms_sum{cId!="", name!="", appId!="", appName!="", protocol!=""}[5m])) by (cId, name, appId, appName, protocol)
+                  /
+                  sum(rate(customer_request_duration_ms_count{cId!="", name!="", appId!="", appName!="", protocol!=""}[5m])) by (cId, name, appId, appName, protocol)
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{appName}} avg"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [300]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})"
+          description: |
+            最近 10 分钟内，平均请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 300 ms。
+            建议关注整体性能退化、容量与资源使用情况。
+        labels:
+          severity: warning
+          category: latency
+          alert_type: latency_avg

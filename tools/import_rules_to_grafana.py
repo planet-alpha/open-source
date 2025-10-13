@@ -1,4 +1,4 @@
-·import os
+import os
 import sys
 import json
 import time
@@ -19,7 +19,7 @@ DEFAULT_BASE_URL = os.environ.get('GRAFANA_URL', 'https://monitor-test.planet-al
 DEFAULT_USER = os.environ.get('GRAFANA_USER', 'admin')
 DEFAULT_PASSWORD = os.environ.get('GRAFANA_PASSWORD', '')
 API_TOKEN = os.environ.get('GRAFANA_API_TOKEN')
-VERIFY_ENV = os.environ.get('GRAFANA_VERIFY', 'true').lower()
+VERIFY_ENV = os.environ.get('GRAFANA_VERIFY', 'false').lower()
 CA_CERT_PATH = os.environ.get('GRAFANA_CA_CERT')
 REQ_TIMEOUT = float(os.environ.get('GRAFANA_TIMEOUT', '60'))
 

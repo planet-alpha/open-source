@@ -1,0 +1,359 @@
+﻿# Grafana 客户侧应用连接数下降未恢复告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-App-Connections" 文件夹下
+# 4) 如需通过环境变量定制阈值，可在 Grafana 容器/服务中设置下述变量，或直接在本文件中替换：
+#    - MIN_BASELINE_CONN: 基线连接数，低于该值不触发（默认：10）
+#    - MIN_DROP_ABS: 绝对下降阈值，单位：连接数（默认：1）
+#    - MIN_DROP_RATIO_PCT: 相对下降阈值，单位：百分比%（默认：0，即不限制）
+#    - EVAL_FROM_SECONDS: 评估回看秒数（默认：180 秒）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer App Connection Alerts
+    folder: Business-Customer-App-Connections
+    interval: 1m
+    rules:
+      - uid: app_conn_drop_not_recovered_1m
+        title: CustomerAppConnectionsDropNotRecovered1m
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 三点式检测：A=两分钟前，B=一分钟前，C=当前；当 B 相对 A 出现下降且 C 未恢复到 A 水平时触发
+                # 指标：sum(online_customer_app{...}) by (name, appName,cId,appId)
+                # 场景1（高基线）：A >= MIN_BASELINE_CONN，且 (A->B 绝对下降>=MIN_DROP_ABS 或 相对下降>=MIN_DROP_RATIO_PCT)，并且 C < A
+                (
+                  sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m) >= 10
+                )
+                and on (name, appName,cId,appId) (
+                  (
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                    -
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 1m)
+                  ) >= 1
+                  or on (name, appName,cId,appId) (
+                    (
+                      (
+                        sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                        -
+                        sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 1m)
+                      )
+                      /
+                      sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                    ) * 100 >= 0
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"})
+                  <
+                  sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                )
+                or on (name, appName,cId,appId) (
+                  # 场景2（低基线）：A < MIN_BASELINE_CONN，且 B < A（任意下降），并且 C < A
+                  (
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m) < 10
+                  )
+                  and on (name, appName,cId,appId) (
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                    >
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 1m)
+                  )
+                  and on (name, appName,cId,appId) (
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"})
+                    <
+                    sum by (name, appName,cId,appId) (online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m)
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} 下降量(相对上一分钟)"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+          # COND: 组合条件 (B > 0 AND NZV > 0)
+          - refId: COND
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ($B > 0) * ($NZV > 0)
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+          - refId: C
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [COND]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: COND
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+
+          # R2: 两分钟前(t-2)连接数（PromQL 查询）
+          - refId: R2
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by (name, appName,cId,appId) (
+                  online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 2m
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} t-2"
+              maxDataPoints: 43200
+              range: true
+              refId: R2
+          # R2V: 归约为数值（last）
+          - refId: R2V
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R2
+              reducer: last
+              type: reduce
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: R2V
+
+          # R1: 一分钟前(t-1)连接数（PromQL 查询）
+          - refId: R1
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by (name, appName,cId,appId) (
+                  online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 1m
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} t-1"
+              maxDataPoints: 43200
+              range: true
+              refId: R1
+          # R1V: 归约为数值（last）
+          - refId: R1V
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R1
+              reducer: last
+              type: reduce
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: R1V
+
+          # RC: 当前连接数（PromQL 查询）
+          - refId: RC
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by (name, appName,cId,appId) (
+                  online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} 当前"
+              maxDataPoints: 43200
+              range: true
+              refId: RC
+          # RCV: 归约为数值（last）
+          - refId: RCV
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RC
+              reducer: last
+              type: reduce
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RCV
+          # NZ_M: 非全零守护（t-2 + t-1 + 当前 > 0）
+          - refId: NZ_M
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $R2 + $R1 + $RC
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+          # NZV: 归约为数值（last）
+          - refId: NZV
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: NZ_M
+              reducer: last
+              type: reduce
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # DABS_M: 计算 A->B 的绝对下降
+          - refId: DABS_M
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $R2 - $R1
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+          # DABS: 归约为数值（last）
+          - refId: DABS
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: DABS_M
+              reducer: last
+              type: reduce
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          # DPCT_M: 计算 A->B 的相对下降(%)
+          - refId: DPCT_M
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: (($R2 - $R1) / $R2) * 100
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+          # DPCT: 归约为数值（last）
+          - refId: DPCT
+            relativeTimeRange:
+              from: 180
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: DPCT_M
+              reducer: last
+              type: reduce
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+        noDataState: OK
+        execErrState: Error
+        # for: 1m 表示条件需持续为真至少 1 分钟，等价于“下一分钟未恢复仍为下降”
+        for: 0s
+        annotations:
+          summary: 客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }}连接数异常下降且未恢复（t-1 相对 t-2，当前未恢复到 t-2 水平）
+          description: |
+            【故障影响】客户 {{ $labels.name }}-{{ $labels.cId }} 应用 {{ $labels.appName }}-{{ $labels.appId }} 连接数在 t-1 相对 t-2 出现下降，且当前未恢复到 t-2 水平，现已触发报警
+            【过程数据】t-2={{ $values.R2V.Value | printf "%.0f" }}，t-1={{ $values.R1V.Value | printf "%.0f" }}，当前={{ $values.RCV.Value | printf "%.0f" }}
+            【下降统计】绝对下降(A→B)={{ $values.DABS.Value | printf "%.0f" }}，相对下降={{ $values.DPCT.Value | printf "%.2f" }}%
+        labels:
+          severity: warning
+          category: business-app-connections
+          alert_type: connection_drop

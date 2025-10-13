@@ -1,0 +1,532 @@
+# Grafana 客户提交失败率告警配置 (Prometheus 数据源)
+# 使用说明：
+# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警将出现在 "Business-Latency" 文件夹下
+# 4) 可通过环境变量定制阈值或评估窗口：
+#    - SUBMIT_EVAL_SECONDS: 提示器回看秒数（默认：1800 秒，即过去 30 分钟）
+#    - SHORT_EVAL_SECONDS: 短窗口回看秒数（默认：300 秒，即过去 5 分钟）
+#    - FAILURE_INFO_RATIO: 失败率提示阈值（默认：0.02，即 2%）
+#    - FAILURE_WARN_RATIO: 失败率预警阈值（默认：0.05，即 5%）
+#    - FAILURE_CRIT_RATIO: 失败率严重阈值（默认：0.10，即 10%）
+#    - MIN_BASELINE_SHORT: 短窗口最小基线提交量（默认：50，5 分钟内提交总量不足则忽略比例）
+#    - MIN_BASELINE_COUNT: 最小基线提交量（默认：100，30 分钟内提交总量不足则忽略比例）
+#    - SURGE_FACTOR: 短期/长期失败率放大倍数阈值（默认：2）
+#    - SURGE_ABS_RATIO: 短期失败率的绝对下限（默认：0.03，即 3%）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer Submit Failure Alerts
+    folder: Business-Latency
+    interval: 1m
+    rules:
+      # 失败率预警（warning）- 使用过去 30 分钟作为评估窗口，并要求达到最小提交量基线
+      - uid: customer_submit_failure_rate_high
+        title: CustomerSubmitFailureRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[30m])
+                    )
+                    /
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                    )
+                  ) > 0.05
+                )
+                and
+                (
+                  sum by(name, appName,cId,appId)(
+                    increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                  ) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_warn"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "客户提交失败率升高 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          description: |
+            基于过去 30 分钟数据，检测到提交失败率超过 0.05（且 30 分钟提交总量 ≥ 100），当前值为满足条件的时间序列集合。
+            为避免短时偶发波动，本规则使用 30 分钟窗口进行评估，且当提交总量低于基线时忽略比例告警。
+        labels:
+          severity: warning
+          category: submit
+          alert_type: submit_failure_rate
+
+      # 失败率严重告警（critical）- 使用过去 30 分钟作为评估窗口，并要求达到最小提交量基线
+      - uid: customer_submit_failure_rate_critical
+        title: CustomerSubmitFailureRateCritical
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[30m])
+                    )
+                    /
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                    )
+                  ) > 0.10
+                )
+                and
+                (
+                  sum by(name, appName,cId,appId)(
+                    increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                  ) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_crit"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "客户提交失败率严重升高 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          description: |
+            基于过去 30 分钟数据，检测到提交失败率超过 0.10（且 30 分钟提交总量 ≥ 100）。
+            为避免短时偶发波动，本规则使用 30 分钟窗口进行评估，且当提交总量低于基线时忽略比例告警。
+        labels:
+          severity: critical
+          category: submit
+          alert_type: submit_failure_rate_critical
+      # 失败率（信息级）- 短窗口 5 分钟用于快速捕捉异常升高，带短窗基线
+      - uid: customer_submit_failure_rate_info_short
+        title: CustomerSubmitFailureRateInfoShort
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m])
+                    )
+                    /
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                    )
+                  ) > 0.02
+                )
+                and
+                (
+                  sum by(name, appName,cId,appId)(
+                    increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                  ) >= 50
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_info_5m"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "客户提交失败率在5分钟窗口内上升 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          description: |
+            基于过去 5 分钟数据，检测到提交失败率超过 0.02（且 5 分钟提交总量 ≥ 50）。
+            该级别用于快速提示短时异常，便于及时关注。
+        labels:
+          severity: info
+          category: submit
+          alert_type: submit_failure_rate_info_5m
+
+      # 短期相对长期的激增（surge）- 5m 相对 30m 失败率倍增，并有绝对下限保护
+      - uid: customer_submit_failure_rate_surge
+        title: CustomerSubmitFailureRateSurge
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m])
+                    )
+                    /
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                    )
+                  )
+                  >
+                  (
+                    (
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[30m])
+                      )
+                      /
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                      )
+                    ) * 2
+                  )
+                )
+                and
+                (
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m])
+                    )
+                    /
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                    )
+                  ) > 0.03
+                )
+                and
+                (
+                  sum by(name, appName,cId,appId)(
+                    increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                  ) >= 50
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_surge"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "客户提交失败率短时激增 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          description: |
+            5 分钟失败率相对 30 分钟失败率出现倍增（> 2x），且短窗失败率超过 0.03，并满足 5 分钟提交量基线。
+            该告警用于快速捕捉短时间异常升高，避免长期窗口掩盖突发问题。
+        labels:
+          severity: warning
+          category: submit
+          alert_type: submit_failure_rate_surge
+
+      # 趋势上升（trend）- 使用5m窗口与线性趋势捕捉上升风险
+      - uid: customer_submit_failure_rate_trend_up
+        title: CustomerSubmitFailureRateTrendUp
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m])
+                      )
+                      /
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                      )
+                    ) > 0.05
+                  )
+                  and
+                  (
+                    (
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m])
+                      )
+                      /
+                      sum by(name, appName,cId,appId)(
+                        increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                      )
+                    )
+                    >
+                    (
+                      (
+                        sum by(name, appName,cId,appId)(
+                          increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m] offset 5m)
+                        )
+                        /
+                        sum by(name, appName,cId,appId)(
+                          increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m] offset 5m)
+                        )
+                      )
+                    )
+                  )
+                  and
+                  (
+                    sum by(name, appName,cId,appId)(
+                      increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                    ) >= 50
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_trend_pred"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: B
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: B
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [B]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "客户提交失败率呈现上升趋势 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          description: |
+            5 分钟失败率的线性预测在未来 10 分钟超过预警阈值 0.05，且 5 分钟提交量满足基线，提示潜在风险。
+            该告警用于早期预警，帮助在失败率尚未实质超过阈值前进行干预。
+        labels:
+          severity: info
+          category: submit
+          alert_type: submit_failure_rate_trend

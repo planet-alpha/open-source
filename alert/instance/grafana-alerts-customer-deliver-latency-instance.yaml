@@ -1,0 +1,368 @@
+﻿# Grafana 交付时延告警配置（Prometheus 数据源）
+# 变量：DS_PROMETHEUS_UID, WINDOW(默认5m), EVAL_FROM_SECONDS(默认600), MIN_BASELINE_TOTAL(默认100)
+# 阈值变量：P99_WARN_MS(2000), P99_HIGH_MS(3000), P99_CRIT_MS(5000), P95_WARN_MS(1500), P95_HIGH_MS(2000), AVG_WARN_MS(800), AVG_HIGH_MS(1200)
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer Deliver Latency Alerts
+    folder: Business-Customer-Deliver-Latency
+    interval: 1m
+    rules:
+      # ==================== p99 - Critical ====================
+      - uid: deliver_latency_p99_critical
+        title: CustomerDeliverLatencyP99Critical
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.99,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [5000], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 5000ms"
+        labels:
+          severity: critical
+          category: business-deliver-latency
+          alert_type: latency_p99
+
+      # ==================== p99 - High ====================
+      - uid: deliver_latency_p99_high
+        title: CustomerDeliverLatencyP99High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.99,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [3000], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 3000ms"
+        labels:
+          severity: high
+          category: business-deliver-latency
+          alert_type: latency_p99
+
+      # ==================== p99 - Warning ====================
+      - uid: deliver_latency_p99_warning
+        title: CustomerDeliverLatencyP99Warning
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.99,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [2000], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 2000ms"
+        labels:
+          severity: warning
+          category: business-deliver-latency
+          alert_type: latency_p99
+
+      # ==================== p95 - High ====================
+      - uid: deliver_latency_p95_high
+        title: CustomerDeliverLatencyP95High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.95,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p95"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [2000], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p95 时延 ≥ 2000ms"
+        labels:
+          severity: high
+          category: business-deliver-latency
+          alert_type: latency_p95
+
+      # ==================== p95 - Warning ====================
+      - uid: deliver_latency_p95_warning
+        title: CustomerDeliverLatencyP95Warning
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.95,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p95"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [1500], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p95 时延 ≥ 1500ms"
+        labels:
+          severity: warning
+          category: business-deliver-latency
+          alert_type: latency_p95
+
+      # ==================== 平均时延 - High ====================
+      - uid: deliver_latency_avg_high
+        title: CustomerDeliverLatencyAvgHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName,cId,appId)(rate(customer_deliver_duration_ms_sum{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName,cId,appId)(rate(customer_deliver_duration_ms_count{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])), 1e-9)
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} avg"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [1200], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 平均时延 ≥ 1200ms"
+        labels:
+          severity: high
+          category: business-deliver-latency
+          alert_type: latency_avg
+
+      # ==================== 平均时延 - Warning ====================
+      - uid: deliver_latency_avg_warning
+        title: CustomerDeliverLatencyAvgWarning
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource: { type: prometheus, uid: P1809F7CD0C75ACF3 }
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName,cId,appId)(rate(customer_deliver_duration_ms_sum{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName,cId,appId)(rate(customer_deliver_duration_ms_count{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])), 1e-9)
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} avg"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [800], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 10m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 平均时延 ≥ 800ms"
+        labels:
+          severity: warning
+          category: business-deliver-latency
+          alert_type: latency_avg

@@ -104,6 +104,169 @@ policies:
           group_interval: 10m
           repeat_interval: 30m
           continue: true
+        # 1) 客户应用连接数偏离 total 基线
+        - receiver: customer-conn-drop 
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-app-connections
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+        # 2) 交付质量
+        - receiver: customer-deliver-quality
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-deliver-quality
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+
+        # 3) 交付耗时
+        - receiver: customer-deliver-latency
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-deliver-latency
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+
+        # 4) 请求耗时（通用 latency）
+        - receiver: customer-latency
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - latency
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+
+        # 5) 上行（MO）质量
+        - receiver: customer-mo-quality
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-mo-quality
+          group_wait: 1m
+          group_interval: 5m
+          repeat_interval: 10m
+          continue: true
+
+        # 6) 上行（MO）TPS
+        - receiver: customer-mo-tps
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+            - countryId
+          object_matchers:
+            - - category
+              - =
+              - business-mo-tps
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+
+        # 7) 客户侧回执下降
+        - receiver: customer-receipt-drop
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-customer-receipt
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+
+        # 8) 提交失败
+        - receiver: customer-submit-failure
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - submit
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+
+        # 9) 登录失败激增
+        - receiver: customer-login
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-customer-login
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
+
+        # 10) 客户侧 TPS 激增
+        - receiver: customer-tps-surge
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-tps-surge
+          group_wait: 2m
+          group_interval: 10m
+          repeat_interval: 30m
+          continue: true
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 4h

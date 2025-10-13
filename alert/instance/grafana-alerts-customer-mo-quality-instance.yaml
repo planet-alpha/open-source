@@ -1,0 +1,250 @@
+# Grafana 上行（MO）质量类告警配置（Prometheus 数据源）
+# 说明：
+# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
+# 3) 告警会出现在 "Business-MO-Quality" 文件夹下
+# 4) 环境变量（可在 Grafana 中设置或直接替换本文内变量）：
+#    - WINDOW：平滑监控窗口，默认 5m（建议 >= 4x scrape_interval）
+#    - EVAL_FROM_SECONDS：评估回看秒数（默认：600 秒）
+#    - FOR_DURATION：告警持续判定时长（默认：5m）
+#    - MIN_BASELINE_TOTAL：基线总量阈值（5m 内请求数），低于该值不触发（默认：50；0 表示禁用）
+#    - SUCCESS_PCT_LOW：成功率下限(%)（默认：95）
+#    - GAP_PCT_HIGH：请求-响应差值比例上限(%)（默认：10）
+#    - ERROR_PCT_HIGH：错误率上限(%)（默认：5）
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer MO Quality Alerts
+    folder: Business-MO-Quality
+    interval: 1m
+    rules:
+      # ================================ 上行成功率过低 ================================
+      - uid: mo_success_rate_low
+        title: MOSuccessRateLow
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 成功率(%) = 100 * success / total（按 name, appName,cId,appId 聚合；遵循看板模板变量）
+                (
+                  100 * (
+                    sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat="0"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  )
+                )
+                and (
+                  # 基线去噪：5m 总量 >= MIN_BASELINE_TOTAL
+                  sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 50
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 上行成功率(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [95]
+                    type: lt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 上行成功率 ≤ 95%"
+          description: |
+            当前上行成功率：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50，为0表示禁用）。
+            成功率阈值：95% ，持续：5m
+            指标计算：成功率(%) = 100 × success / total
+        labels:
+          severity: warning
+          category: business-mo-quality
+          alert_type: success_rate
+
+      # ====================== 请求-响应差值比例偏高（应答缺失/阻塞） ======================
+      - uid: mo_req_resp_gap_high
+        title: MOReqRespGapHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 差值比例(%) = 100 * clamp_min(req - resp, 0) / clamp_min(req, 1)
+                # 仅在 req 足够时触发（基线去噪）
+                (
+                  100 * (
+                    clamp_min(
+                      (
+                        sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                        -
+                        sum by(name, appName,cId,appId)(increase(customer_mo_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                      ), 0
+                    )
+                    /
+                    clamp_min(
+                      sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1
+                    )
+                  )
+                )
+                and (
+                  sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 50
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 请求-响应差值比例(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [10]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 请求-响应差值比例 ≥ 10%"
+          description: |
+            当前差值比例：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50）。
+            差值比例阈值：10% ，持续：5m
+            指标计算：差值比例(%) = 100 × clamp_min(req - resp, 0) / clamp_min(req, 1)
+        labels:
+          severity: warning
+          category: business-mo-quality
+          alert_type: req_resp_gap
+
+      # ================================ 错误率升高 ================================
+      - uid: mo_error_rate_high
+        title: MOErrorRateHigh
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 错误率(%) = 100 * error / total（stat!="0" 视为错误）
+                (
+                  100 * (
+                    sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!="0"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  )
+                )
+                and (
+                  sum by(name, appName,cId,appId)(increase(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 50
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 错误率(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [5]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 错误率 ≥ 5%"
+          description: |
+            当前错误率：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50）。
+            错误率阈值：5% ，持续：5m
+            指标计算：错误率(%) = 100 × error / total
+        labels:
+          severity: warning
+          category: business-mo-quality
+          alert_type: error_rate
