@@ -37,14 +37,14 @@ groups:
                 uid: P1809F7CD0C75ACF3
               expr: |
                 (
-                  sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
-                  / avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on() (avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+                and on() (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -90,8 +90,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "TPS总量激增≥30% (Warning)"
-          description: "当前TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS总量激增≥30% (Warning)"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 当前TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -113,14 +113,14 @@ groups:
                 uid: P1809F7CD0C75ACF3
               expr: |
                 (
-                  sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
-                  / avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on() (avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+                and on() (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -166,8 +166,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "TPS总量激增≥50% (High)"
-          description: "当前TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS总量激增≥50% (High)"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 当前TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟"
         labels:
           severity: high
           category: business-tps-surge
@@ -189,14 +189,14 @@ groups:
                 uid: P1809F7CD0C75ACF3
               expr: |
                 (
-                  sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
-                  / avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
+                  sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  / avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on() (avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
+                and on() (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -242,8 +242,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "TPS总量激增≥70% (Critical)"
-          description: "当前TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS总量激增≥70% (Critical)"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 当前TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟"
         labels:
           severity: critical
           category: business-tps-surge
@@ -266,15 +266,15 @@ groups:
                 type: prometheus
                 uid: P1809F7CD0C75ACF3
               expr: |
-                sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
-                and on() (sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 100)
+                sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
+                and on() (sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 100)
                 and on() (
-                  sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
-                  > avg_over_time(sum by()(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m]) * 1.5
+                  sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
+                  > avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m]) * 1.5
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "当前TPS"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}当前TPS"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -320,8 +320,8 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "TPS短时窗口激增告警"
-          description: "当前TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS短时窗口激增告警"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 当前TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -352,7 +352,7 @@ groups:
                 and on(name, appName,cId,appId) (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -398,8 +398,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}的TPS激增≥30%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}TPS相对30m基线激增≥30%，且基线≥20 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS激增≥30%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS相对30m基线激增≥30%，且基线≥20 TPS，持续3分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -428,7 +428,7 @@ groups:
                 and on(name, appName,cId,appId) (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}}激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -474,8 +474,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}的TPS激增≥50%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}TPS相对30m基线激增≥50%，且基线≥20 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS激增≥50%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS相对30m基线激增≥50%，且基线≥20 TPS，持续3分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -504,7 +504,7 @@ groups:
                 and on(name, appName,cId,appId) (avg_over_time(sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -550,8 +550,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}的TPS激增≥70%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}TPS相对30m基线激增≥70%，且基线≥20 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS激增≥70%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS相对30m基线激增≥70%，且基线≥20 TPS，持续3分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -580,7 +580,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name }}-{{appName }} 当前TPS"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 当前TPS"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -626,8 +626,8 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "客户{{ $labels.name }}的应用{{ $labels.appName }}短时窗口TPS激增"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}的TPS超过3m平均值的40%，且绝对值≥30 TPS，持续2分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 短时窗口TPS激增"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} TPS超过3m平均值的40%，且绝对值≥30 TPS，持续2分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -704,8 +704,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}的TPS激增≥30%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS相对30m基线激增≥30%，且基线≥10 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS激增≥30%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS相对30m基线激增≥30%，且基线≥10 TPS，持续3分钟"
         labels:
           severity: warning
           category: business-tps-surge
@@ -734,7 +734,7 @@ groups:
                 and on(name, appName,cId,appId, connectId) (avg_over_time(sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 8)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 通道id-{{connectId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -780,8 +780,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}的TPS激增≥50%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS激增≥50%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟"
         labels:
           severity: high
           category: business-tps-surge
@@ -810,7 +810,7 @@ groups:
                 and on(name, appName,cId,appId, connectId) (avg_over_time(sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 8)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 通道id-{{connectId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -856,8 +856,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}的TPS激增≥70%"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS相对30m基线激增≥70%，且基线≥8 TPS，持续3分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS激增≥70%"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS相对30m基线激增≥70%，且基线≥8 TPS，持续3分钟"
         labels:
           severity: high
           category: business-tps-surge
@@ -886,7 +886,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前TPS"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 通道id-{{connectId}} 当前TPS"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -932,8 +932,8 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}短时窗口TPS激增"
-          description: "客户{{ $labels.name }}的应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS超过3m平均值的30%，且绝对值≥5 TPS，持续2分钟"
+          summary: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} 短时窗口TPS激增"
+          description: "客户{{$labels.name}}-{{$labels.cId}} 应用{{$labels.appName}}-{{$labels.appId}} 通道{{$labels.connectId}} TPS超过3m平均值的30%，且绝对值≥5 TPS，持续2分钟"
         labels:
           severity: warning
           category: business-tps-surge

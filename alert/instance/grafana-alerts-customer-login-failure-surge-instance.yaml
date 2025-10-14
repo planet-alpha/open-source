@@ -79,6 +79,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
+              legendFormat: "{{appId}} 当前失败突增比例(%)"
               instant: true
               range: false
               refId: A
@@ -113,27 +114,9 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "客户登陆失败突增（相对30m基线）"
+          summary: "客户{{ $labels.appId }}登陆失败突增（相对30m基线）"
           description: |
             客户登陆失败率相对30分钟基线突然增长 ≥ 50%
-            
-            配置参数：
-            - 突增比例阈值：50%
-            - 绝对失败基线(MIN_ABS_FAIL)：10
-            - 总量基线(MIN_BASELINE_TOTAL)：50
-            - 持续时间：2m
-            
-            指标说明：
-            - 当前2m失败率 F_cur(%) = 100 * fail_2m / total_2m
-            - 30m基线失败率 F_base(%) = 30m内失败率的1m均值
-            - 突增比例 SURGE_PCT(%) = (F_cur - F_base)/F_base*100
-            - 失败定义：reason字段不为"连接成功"的所有情况
-            
-            排查建议：
-            1. 检查应用 {{ $labels.appId }} 的网络连接状态
-            2. 查看认证服务的负载和响应时间
-            3. 检查近期配置变更和发布情况
-            4. 分析具体的失败原因分布
         labels:
           severity: warning
           category: business-customer-login
@@ -172,6 +155,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
+              legendFormat: "{{appId}} 当前失败率(%)"
               instant: true
               range: false
               refId: A
@@ -206,26 +190,9 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "客户登陆失败率过高"
+          summary: "客户{{ $labels.appId }}登陆失败率过高"
           description: |
             客户登陆失败率超过阈值 10%
-            
-            配置参数：
-            - 失败率阈值：10%
-            - 绝对失败基线(MIN_ABS_FAIL)：10
-            - 总量门槛：50/2 = {{ div 50 2 }}
-            - 持续时间：2m
-            
-            指标说明：
-            - 失败率计算基于过去2分钟的数据
-            - 失败定义：reason字段不为"连接成功"的所有情况
-            - 同时需要满足绝对失败数和总量门槛条件
-            
-            排查建议：
-            1. 检查应用 {{ $labels.appId }} 的登陆服务状态
-            2. 分析失败原因的具体分布
-            3. 检查用户侧网络和客户端状态
-            4. 查看服务端的认证和授权逻辑
         labels:
           severity: critical
           category: business-customer-login
@@ -264,6 +231,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
+              legendFormat: "{{appId}} 当前登陆失败数"
               instant: true
               range: false
               refId: A
@@ -298,25 +266,9 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "客户登陆失败数绝对突增"
+          summary: "客户{{ $labels.appId }}登陆失败数绝对突增"
           description: |
             客户登陆失败数相对30分钟均值出现绝对突增 ≥ 10
-            
-            配置参数：
-            - 绝对突增阈值(MIN_ABS_FAIL)：10
-            - 总量基线(MIN_BASELINE_TOTAL)：50
-            - 持续时间：2m
-            
-            指标说明：
-            - 当前2m失败数 - 30m内2m失败数均值 ≥ 阈值
-            - 失败定义：reason字段不为"连接成功"的所有情况
-            - 用于检测失败数的绝对增长，补充相对增长监控
-            
-            排查建议：
-            1. 立即检查应用 {{ $labels.appId }} 的登陆服务
-            2. 查看是否有大量用户同时遇到登陆问题
-            3. 检查系统负载和资源使用情况
-            4. 分析失败模式和错误分布
         labels:
           severity: warning
           category: business-customer-login
