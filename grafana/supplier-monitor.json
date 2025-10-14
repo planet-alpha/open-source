@@ -301,7 +301,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by(name, appName)(rate(customer_submit_total{cId=~\"$cId\", name=~\"$name\", appId=~\"$appId\", appName=~\"$appName\", protocol=~\"$protocol\", stat=\"0\"}[1m]))",
+          "expr": "sum by(name, appName)(rate(supplier_submit_total{cId=~\"$cId\", name=~\"$name\", appId=~\"$appId\", appName=~\"$appName\", protocol=~\"$protocol\", stat=\"0\"}[1m]))",
           "legendFormat": "{{name}}-{{appName}}",
           "range": true,
           "refId": "A"
@@ -486,7 +486,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by(name, appName,connectId)(rate(customer_submit_total{cId=~\"$cId\", name=~\"$name\", appId=~\"$appId\", appName=~\"$appName\", stat=\"0\"}[1m]))",
+          "expr": "sum by(name, appName,connectId)(rate(supplier_submit_total{cId=~\"$cId\", name=~\"$name\", appId=~\"$appId\", appName=~\"$appName\", stat=\"0\"}[1m]))",
           "legendFormat": "{{appName}}-{{connectId}}",
           "range": true,
           "refId": "A"
