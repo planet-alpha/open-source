@@ -16,14 +16,14 @@ contactPoints:
     receivers:
       # - uid: supplier-conn-drop-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_conn_drop@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier Conn Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-conn-drop-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -35,14 +35,14 @@ contactPoints:
     receivers:
       # - uid: supplier-deliver-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_deliver@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier Delivery] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-deliver-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -54,14 +54,14 @@ contactPoints:
     receivers:
       # - uid: supplier-latency-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_latency@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-latency-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -73,14 +73,14 @@ contactPoints:
     receivers:
       # - uid: supplier-mo-tps-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_mo_tps@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier MO TPS] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-mo-tps-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -92,14 +92,14 @@ contactPoints:
     receivers:
       # - uid: supplier-submitresp-drop-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_submitresp_drop@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier SubmitResp Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-submitresp-drop-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -111,14 +111,14 @@ contactPoints:
     receivers:
       # - uid: supplier-tps-surge-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_supplier_tps_surge@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Supplier TPS Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: supplier-tps-surge-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'

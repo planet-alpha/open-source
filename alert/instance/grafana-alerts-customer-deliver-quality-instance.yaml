@@ -1,28 +1,20 @@
-# Grafana 客户侧交付质量告警配置（Prometheus 数据源）
+# Grafana 客户侧交付成功率与提交失败率告警配置（Prometheus 数据源）
 # 说明：
 # 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
 # 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
-# 3) 告警会出现在 "Business-Deliver-Quality" 文件夹下
-# 4) 环境变量（可在 Grafana 中设置或直接替换本文内变量）：
-#    - WINDOW：平滑监控窗口，默认 5m（用于 reduce noise，建议 >= 4x scrape_interval）
-#    - EVAL_FROM_SECONDS：评估回看秒数（默认：600 秒）
-#    - FOR_DURATION：告警持续判定时长（默认：5m）
-#    - MIN_BASELINE_TOTAL：基线总量阈值，低于该值不触发（默认：100；设为 0 表示无门槛，相当于禁用基线检查）
-#    - FAIL_PCT_THRESHOLD：失败比例阈值(%)，默认：1
-#    - TIMEOUT_PCT_THRESHOLD：超时比例阈值(%)，默认：2
-#    - RECEIPT_PCT_LOW：回执比例下限(%)，默认：99.5
+# 3) 文件内包含两个告警组：交付成功率过低、提交失败率信息级（5m）
 
 apiVersion: 1
 
 groups:
+  # =============================== 客户侧交付成功率过低 ===============================
   - orgId: 1
     name: Customer Deliver Quality Alerts
     folder: Business-Customer-Deliver-Quality
     interval: 1m
     rules:
-      # ================================= 失败比例升高 =================================
       - uid: deliver_fail_rate_high
-        title: CustomerDeliverFailRateHigh
+        title: CustomerDeliverSuccessRateLow
         condition: C
         data:
           - refId: A
@@ -36,93 +28,22 @@ groups:
                 uid: P1809F7CD0C75ACF3
               editorMode: code
               expr: |
-                # 失败比例(%) = 100 * fail / non_timeout
-                # 分组仅按 (name, appName,cId,appId)，保留模板变量
+                # 成功率(%) = 100 * success / total
+                # 分组按 (name, appName, cId, appId)
                 (
                   100 * (
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
-                    /
-                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])), 1)
-                  )
-                )
-                and (
-                  # 基线去噪：总量 >= MIN_BASELINE_TOTAL；当 MIN_BASELINE_TOTAL=0 时恒为真，相当于禁用基线检查
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
-                )
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 失败比例(%)"
-              maxDataPoints: 43200
-              instant: true
-              range: false
-              refId: A
-          - refId: C
-            relativeTimeRange:
-              from: 600
-              to: 0
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator:
-                    params: [1]
-                    type: gt
-                  operator:
-                    type: and
-                  query:
-                    params: [A]
-                  reducer:
-                    type: last
-                  type: query
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: C
-              type: threshold
-        noDataState: OK
-        execErrState: Error
-        for: 5m
-        annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 失败比例 ≥ 1%"
-          description: |
-            当前失败比例：{{ printf "%.2f" $values.A.Value }}%。
-        labels:
-          severity: warning
-          category: business-deliver-quality
-          alert_type: fail_rate
-
-      # ================================= 超时比例升高 =================================
-      - uid: deliver_timeout_rate_high
-        title: CustomerDeliverTimeoutRateHigh
-        condition: C
-        data:
-          - refId: A
-            relativeTimeRange:
-              from: 600
-              to: 0
-            datasourceUid: P1809F7CD0C75ACF3
-            model:
-              datasource:
-                type: prometheus
-                uid: P1809F7CD0C75ACF3
-              editorMode: code
-              expr: |
-                # 超时比例(%) = 100 * timeout / total
-                (
-                  100 * (
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^(DELIVRD|ACCEPTD)$"}[5m]))
                     /
                     clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                   )
                 )
                 and (
+                  # 基线去噪：总量 >= 100（total 包含所有状态，不排除超时）
                   sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 超时比例(%)"
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 成功比例(%)"
               maxDataPoints: 43200
               instant: true
               range: false
@@ -135,78 +56,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [2]
-                    type: gt
-                  operator:
-                    type: and
-                  query:
-                    params: [A]
-                  reducer:
-                    type: last
-                  type: query
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              intervalMs: 1000
-              maxDataPoints: 43200
-              refId: C
-              type: threshold
-        noDataState: OK
-        execErrState: Error
-        for: 5m
-        annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 超时比例 ≥ 2%"
-          description: |
-            当前超时比例：{{ printf "%.2f" $values.A.Value }}%
-        labels:
-          severity: warning
-          category: business-deliver-quality
-          alert_type: timeout_rate
-
-      # ================================= 回执比例过低 =================================
-      - uid: deliver_receipt_rate_low
-        title: CustomerDeliverReceiptRateLow
-        condition: C
-        data:
-          - refId: A
-            relativeTimeRange:
-              from: 600
-              to: 0
-            datasourceUid: P1809F7CD0C75ACF3
-            model:
-              datasource:
-                type: prometheus
-                uid: P1809F7CD0C75ACF3
-              editorMode: code
-              expr: |
-                # 回执比例(%) = 100 * non_timeout / total
-                (
-                  100 * (
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m]))
-                    /
-                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
-                  )
-                )
-                and (
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
-                )
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 回执比例(%)"
-              maxDataPoints: 43200
-              instant: true
-              range: false
-              refId: A
-          - refId: C
-            relativeTimeRange:
-              from: 600
-              to: 0
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator:
-                    params: [99.5]
+                    params: [99]
                     type: lt
                   operator:
                     type: and
@@ -227,10 +77,176 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 回执比例 ≤ 99.5%"
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 成功比例 ≤ 99%"
           description: |
-            当前回执比例：{{ printf "%.2f" $values.A.Value }}%
+            当前成功比例：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：100，总量包含超时）。
+            指标计算：成功率(%) = 100 × success(DELIVRD|ACCEPTD) / total(包含所有状态)
         labels:
           severity: warning
           category: business-deliver-quality
-          alert_type: receipt_rate
+          alert_type: success_rate
+  
+  # =============================== 客户侧回执下降率 ===============================
+      - uid: customer_receipt_drop_rate
+        title: CustomerReceiptDropRate
+        condition: C
+        data:
+          # A: 回执下降比例(%)，相对30m动态基线，且满足绝对下降与总量基线门槛
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 计算回执下降比例(%)，相对30m动态基线，并应用双门槛过滤
+                clamp_min(
+                  (
+                    # R_base: 30m基线回执比例(%)
+                    100 * avg_over_time((
+                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    )[30m:1m])
+                    
+                    -
+                    
+                    # R_cur: 当前1m回执比例(%)
+                    100 * (
+                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    )
+                  )
+                  /
+                  # 除以基线比例，得到相对下降比例
+                  100 * avg_over_time((
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  )[30m:1m])
+                  * 100, 0
+                )
+                and (
+                  # 绝对下降门槛：30m内1m回执数均值 - 当前1m回执数 >= MIN_ABS_DROP
+                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))[30m:1m])
+                  -
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  >= 10
+                )
+                and (
+                  # 总量基线门槛：30m内1m非超时总量的均值 >= MIN_BASELINE_TOTAL
+                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))[30m:1m]) >= 100
+                )
+                and (
+                  # 基线回执比例必须大于0，避免除零错误
+                  100 * avg_over_time((
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  )[30m:1m]) > 0
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | 下降比例(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: A
+          
+          # B: 当前1m回执比例(%)
+          - refId: B
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                100 * (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | 当前1m回执比例(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: B
+          
+          # D: 30m基线回执比例(%)
+          - refId: D
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                100 * avg_over_time((
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                )[30m:1m])
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | 30m基线回执比例(%)"
+              maxDataPoints: 43200
+              range: false
+              refId: D
+          
+          # C: 阈值判断——当下降比例 ≥ RECEIPT_DROP_PCT_THRESHOLD 触发
+          - refId: C
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [5]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "客户回执下降率异常: name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }}"
+          description: |
+            监控数据详情（含实时数值）：
+            - 标识信息：name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }}
+            - 当前1m回执比例 R_cur(%)：{{ printf "%.2f" (index $values "B") }} （查询B：最近1分钟 resp_1m / non_timeout_1m）
+            - 30m基线回执比例 R_base(%)：{{ printf "%.2f" (index $values "D") }} （查询D：${BASELINE_WINDOW:-30m}区间内 R_cur 的1m均值）
+            - 相对下降比例 DROP_PCT(%)：{{ printf "%.2f" (index $values "A") }} （查询A：clamp_min((R_base - R_cur)/R_base*100, 0)）
+ 
+        labels:
+          severity: warning
+          category: business-customer-receipt
+          alert_type: receipt_drop_rate

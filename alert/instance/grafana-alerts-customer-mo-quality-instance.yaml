@@ -248,3 +248,155 @@ groups:
           severity: warning
           category: business-mo-quality
           alert_type: error_rate
+
+      # ================================ TPS 激增 ================================
+      - uid: mo_tps_surge
+        title: MOTpsSurge
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                # 5m 瞬时速率 vs 1h 平均速率基线，按 (name, appName,cId,appId) 聚合
+                (
+                  sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                  >
+                  3 * sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m] offset 1h))
+                )
+                and (
+                  sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) > 20
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} TPS 激增"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          # 在 A 与 C 之间新增两个查询用于在 description 展示详细数据
+          - refId: B
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 当前QPS"
+              maxDataPoints: 43200
+              range: false
+              refId: B
+          - refId: E
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: E
+          - refId: D
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: P1809F7CD0C75ACF3
+            model:
+              datasource:
+                type: prometheus
+                uid: P1809F7CD0C75ACF3
+              editorMode: code
+              expr: |
+                sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m] offset 1h))
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 基线QPS(1h)"
+              maxDataPoints: 43200
+              range: false
+              refId: D
+          - refId: F
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: D
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: F
+          - refId: Z
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              settings:
+                mode: ""
+              type: reduce
+              refId: Z
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [1]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [Z]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: Z
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} TPS 激增"
+          description: |
+            当前5m QPS：{{ $values.E.Value | printf "%.2f" }}；基线(1h)QPS：{{ $values.F.Value | printf "%.2f" }}。
+        labels:
+          severity: warning
+          category: business-mo-tps
+          alert_type: tps_surge

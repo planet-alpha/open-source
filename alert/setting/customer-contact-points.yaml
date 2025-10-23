@@ -20,14 +20,14 @@ contactPoints:
     receivers:
       # - uid: customer-conn-drop-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_conn_drop@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Conn Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-conn-drop-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -40,14 +40,14 @@ contactPoints:
     receivers:
       # - uid: customer-deliver-quality-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_deliver_quality@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Delivery Quality] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-deliver-quality-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -60,14 +60,14 @@ contactPoints:
     receivers:
       # - uid: customer-deliver-latency-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_deliver_latency@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Delivery Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-deliver-latency-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -80,14 +80,14 @@ contactPoints:
     receivers:
       # - uid: customer-latency-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_latency@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-latency-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -100,14 +100,14 @@ contactPoints:
     receivers:
       # - uid: customer-mo-quality-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_mo_quality@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer MO Quality] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-mo-quality-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -120,14 +120,14 @@ contactPoints:
     receivers:
       # - uid: customer-mo-tps-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_mo_tps@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer MO TPS] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-mo-tps-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -140,14 +140,14 @@ contactPoints:
     receivers:
       # - uid: customer-receipt-drop-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_receipt_drop@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Receipt Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-receipt-drop-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -160,14 +160,14 @@ contactPoints:
     receivers:
       # - uid: customer-submit-failure-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_submit_failure@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Submit Failure] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-submit-failure-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -180,14 +180,14 @@ contactPoints:
     receivers:
       # - uid: customer-login-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_login@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer Login Failure Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-login-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'
@@ -200,14 +200,14 @@ contactPoints:
     receivers:
       # - uid: customer-tps-surge-email
       #   type: email
-      #   disableResolveMessage: false
+      #   disableResolveMessage: true
       #   settings:
       #     addresses: "replace_me_customer_tps_surge@example.com"
       #     singleEmail: true
       #     subject: "[Grafana][Customer TPS Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
       - uid: customer-tps-surge-feishu
         type: webhook
-        disableResolveMessage: false
+        disableResolveMessage: true
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
           message: '{{ template "custom.alerts" . }}'

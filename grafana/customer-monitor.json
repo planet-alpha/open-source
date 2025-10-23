@@ -409,7 +409,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^timeout$\"}[1m]))",
+          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "{{appName}}-成功比例",
@@ -422,7 +422,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^timeout$\"}[1m]))",
+          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "{{appName}}-失败比例",
