@@ -40,7 +40,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} p95"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p95"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -88,7 +88,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})"
+          summary: "p95 请求耗时过高: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }}"
           description: |
             最近 5 分钟内，p95 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 500 ms。
             请检查服务依赖、数据库慢查询、下游依赖及资源瓶颈。
@@ -120,7 +120,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} p99"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -168,10 +168,9 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})"
+          summary: "p99 请求耗时严重升高: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }}"
           description: |
             最近 5 分钟内，p99 请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 1000 ms。
-            影响用户的长尾延迟显著升高，请尽快排查。
         labels:
           severity: critical
           category: latency
@@ -200,7 +199,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} avg"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} avg"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -248,7 +247,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})"
+          summary: "平均请求耗时过高: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }}"
           description: |
             最近 10 分钟内，平均请求耗时为 {{ $values.A.Value | printf "%.0f" }} ms，超过阈值 300 ms。
             建议关注整体性能退化、容量与资源使用情况。

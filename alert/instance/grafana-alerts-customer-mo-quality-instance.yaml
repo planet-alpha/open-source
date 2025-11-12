@@ -51,7 +51,7 @@ groups:
               interval: ""
               intervalMs: 1000
               instant: true
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 上行成功率(%)"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 上行成功率(%)"
               maxDataPoints: 43200
               range: false
               refId: A
@@ -84,7 +84,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 上行成功率 ≤ 95%"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 上行成功率 ≤ 95%"
           description: |
             当前上行成功率：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50，为0表示禁用）。
             成功率阈值：95% ，持续：5m
@@ -133,7 +133,7 @@ groups:
               interval: ""
               intervalMs: 1000
               instant: true
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 请求-响应差值比例(%)"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 请求-响应差值比例(%)"
               maxDataPoints: 43200
               range: false
               refId: A
@@ -166,7 +166,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 请求-响应差值比例 ≥ 10%"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 请求-响应差值比例 ≥ 10%"
           description: |
             当前差值比例：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50）。
             差值比例阈值：10% ，持续：5m
@@ -206,7 +206,7 @@ groups:
               interval: ""
               intervalMs: 1000
               instant: true
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 错误率(%)"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 错误率(%)"
               maxDataPoints: 43200
               range: false
               refId: A
@@ -239,7 +239,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 错误率 ≥ 5%"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 错误率 ≥ 5%"
           description: |
             当前错误率：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：50）。
             错误率阈值：5% ，持续：5m
@@ -276,7 +276,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} TPS 激增"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} TPS 激增"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -296,7 +296,7 @@ groups:
               interval: ""
               intervalMs: 1000
               instant: true
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 当前QPS"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 当前QPS"
               maxDataPoints: 43200
               range: false
               refId: B
@@ -330,7 +330,7 @@ groups:
               interval: ""
               intervalMs: 1000
               instant: true
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} 基线QPS(1h)"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 基线QPS(1h)"
               maxDataPoints: 43200
               range: false
               refId: D
@@ -393,7 +393,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} TPS 激增"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} TPS 激增"
           description: |
             当前5m QPS：{{ $values.E.Value | printf "%.2f" }}；基线(1h)QPS：{{ $values.F.Value | printf "%.2f" }}。
         labels:

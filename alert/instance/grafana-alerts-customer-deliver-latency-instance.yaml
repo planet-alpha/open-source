@@ -32,7 +32,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
               instant: true
               range: false
               refId: A
@@ -41,7 +41,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [11000], type: gt }
+                - evaluator: { params: [20000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -55,7 +55,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 11000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 20000ms"
         labels:
           severity: critical
           category: business-deliver-latency
@@ -83,7 +83,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
               instant: true
               range: false
               refId: A
@@ -92,7 +92,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [10000], type: gt }
+                - evaluator: { params: [15000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -106,7 +106,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 10000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 15000ms"
         labels:
           severity: high
           category: business-deliver-latency
@@ -134,7 +134,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p99"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
               instant: true
               range: false
               refId: A
@@ -143,7 +143,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [9000], type: gt }
+                - evaluator: { params: [10000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -157,7 +157,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p99 时延 ≥ 9000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 10000ms"
         labels:
           severity: warning
           category: business-deliver-latency
@@ -185,7 +185,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p95"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p95"
               instant: true
               range: false
               refId: A
@@ -208,7 +208,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p95 时延 ≥ 8000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 8000ms"
         labels:
           severity: high
           category: business-deliver-latency
@@ -236,7 +236,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} p95"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p95"
               instant: true
               range: false
               refId: A
@@ -259,7 +259,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} p95 时延 ≥ 6500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 6500ms"
         labels:
           severity: warning
           category: business-deliver-latency
@@ -287,7 +287,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} avg"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} avg"
               instant: true
               range: false
               refId: A
@@ -310,7 +310,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 平均时延 ≥ 8500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 8500ms"
         labels:
           severity: high
           category: business-deliver-latency
@@ -338,7 +338,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "客户{{name}}-{{cId}} 应用{{appName}}-{{appId}} avg"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} avg"
               instant: true
               range: false
               refId: A
@@ -361,7 +361,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }} 平均时延 ≥ 7500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 7500ms"
         labels:
           severity: warning
           category: business-deliver-latency

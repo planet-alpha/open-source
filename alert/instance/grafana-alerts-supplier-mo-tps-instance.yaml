@@ -45,7 +45,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Warning) - 倍率"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(Warning) - 倍率"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -66,7 +66,7 @@ groups:
                 10
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Warning) - 绝对值"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(Warning) - 绝对值"
               maxDataPoints: 43200
               range: true
               refId: B
@@ -110,7 +110,7 @@ groups:
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前MO TPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -128,7 +128,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 1h基线MO TPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -196,7 +196,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: MO TPS 激增(Warning) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} MO TPS 激增(Warning)"
           description: |
             当前 5m TPS 明显高于 1h 基线。
             当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。
@@ -230,7 +230,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(High) - 倍率"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(High) - 倍率"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -251,7 +251,7 @@ groups:
                 20
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(High) - 绝对值"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(High) - 绝对值"
               maxDataPoints: 43200
               range: true
               refId: B
@@ -295,7 +295,7 @@ groups:
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 5m窗口MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 5m窗口MO TPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -313,7 +313,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 1h基线MO TPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -381,7 +381,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: MO TPS 激增(High) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} MO TPS 激增(High)"
           description: |
             当前 5m TPS 显著高于 1h 基线。
             当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。
@@ -415,7 +415,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Critical) - 倍率"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(Critical) - 倍率"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -436,7 +436,7 @@ groups:
                 50
               interval: ""
               intervalMs: 1000
-              legendFormat: "MO TPS 激增(Critical) - 绝对值"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} MO TPS 激增(Critical) - 绝对值"
               maxDataPoints: 43200
               range: true
               refId: B
@@ -480,7 +480,7 @@ groups:
                 sum by(name, appName)(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 5m窗口MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 5m窗口MO TPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -498,7 +498,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_mo_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])[1h:5m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 1h基线MO TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 1h基线MO TPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -566,7 +566,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: MO TPS 激增(Critical) - 供应商：{{ $labels.name }}/{{ $labels.appName }}
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} MO TPS 激增(Critical)"
           description: |
             当前 5m TPS 远高于 1h 基线。
             当前值: {{ $values.RR.Value | printf "%.2f" }} TPS，基线: {{ $values.TT.Value | printf "%.2f" }} TPS。

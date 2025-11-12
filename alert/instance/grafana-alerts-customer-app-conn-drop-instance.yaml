@@ -8,6 +8,11 @@
 #    - MIN_DROP_ABS: 绝对下降阈值，单位：连接数（默认：1）
 #    - MIN_DROP_RATIO_PCT: 相对下降阈值，单位：百分比%（默认：0，即不限制）
 #    - EVAL_FROM_SECONDS: 评估回看秒数（默认：180 秒）
+#
+# 变更说明：
+# - 新增“断联前的当前连接数统计（PRE）”与“恢复后的当前连接数统计（POST）”
+# - 采样频率为每 30 秒（仅作用于新增统计查询，避免影响原有告警判断）
+# - 在通知注解中展示统计值与时间戳：使用 $values.PRE.Value/$values.PRE.Time 与 $values.POST.Value/$values.POST.Time
 
 apiVersion: 1
 
@@ -64,7 +69,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} 断连模式匹配"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 断连模式匹配"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -109,13 +114,54 @@ groups:
               refId: C
               type: threshold
 
+          # PRE_RAW: 断联前（最后一次非零）连接数采样，选取 offset 3m 对应样本
+          - refId: PRE_RAW
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by (name, appName,cId,appId) (
+                  online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"} offset 3m
+                )
+              interval: "30s"
+              intervalMs: 30000
+              legendFormat: "断联前连接数(3m) 客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}}"
+              maxDataPoints: 43200
+              range: true
+              refId: PRE_RAW
+
+          # PRE: 将 PRE_RAW 归约为单值（last），以便在注解中引用值与时间戳
+          - refId: PRE
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: PRE_RAW
+              reducer: last
+              type: reduce
+            intervalMs: 30000
+            maxDataPoints: 43200
+            refId: PRE
+
         noDataState: OK
         execErrState: Error
         for: 0m
         annotations:
-          summary: 客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }}满足“前2次为0且再之前3次>0”，触发断连告警
+          summary: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} ，触发断连告警
           description: |
-            【故障影响】相对于当前时间点，前两次连续检测结果等于0，且这两次之前的三次检测结果都大于0，触发断连告警
+            【连接数记录】断联前连接数={{ $values.PRE.Value }}，时间戳={{ $values.PRE.Time }}
+
+
         labels:
           severity: warning
           category: business-app-connections
@@ -168,7 +214,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{cId}}, {{appName}}-{{appId}} 恢复模式匹配"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 恢复模式匹配"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -213,13 +259,52 @@ groups:
               refId: C
               type: threshold
 
+          # POST_RAW: 恢复后的当前连接数（不加 offset，即当前时刻）
+          - refId: POST_RAW
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by (name, appName,cId,appId) (
+                  online_customer_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                )
+              interval: "30s"
+              intervalMs: 30000
+              legendFormat: "恢复后连接数 客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}}"
+              maxDataPoints: 43200
+              range: true
+              refId: POST_RAW
+
+          # POST: 将 POST_RAW 归约为单值（last），以便在注解中引用值与时间戳
+          - refId: POST
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: POST_RAW
+              reducer: last
+              type: reduce
+            intervalMs: 30000
+            maxDataPoints: 43200
+            refId: POST
+
         noDataState: OK
         execErrState: Error
         for: 0m
         annotations:
-          summary: 客户{{ $labels.name }}-{{ $labels.cId }} 应用{{ $labels.appName }}-{{ $labels.appId }}满足“最近3次>0且再之前2次=0”，发送恢复连接通知
+          summary: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 满足“最近3次>0且再之前2次=0”，发送恢复连接通知
           description: |
-            【恢复说明】相对于当前时间点，连接数连续三次检测结果大于0，且这三次检测之前的两次检测结果等于0，发送恢复连接通知
+            【连接数记录】恢复后连接数={{ $values.POST.Value }}，时间戳={{ $values.POST.Time }}
         labels:
           severity: info
           category: business-app-connections

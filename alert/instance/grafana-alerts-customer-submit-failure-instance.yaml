@@ -44,7 +44,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "name={{name}}, appName={{appName}}, cId={{cId}}, appId={{appId}} | failure_rate_info_5m"
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} | failure_rate_info_5m"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -92,9 +92,9 @@ groups:
         execErrState: Error
         for: 0m
         annotations:
-          summary: "客户提交失败率在5分钟窗口内上升 (name={{ $labels.name }}, appName={{ $labels.appName }}, cId={{ $labels.cId }}, appId={{ $labels.appId }})"
+          summary: "客户提交失败率在5分钟窗口内上升 (客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }})"
           description: |
-            基于过去 5 分钟数据，检测到提交失败率超过 0.02（且 5 分钟提交总量 ≥ 50）。
+            基于过去 5 分钟数据，检测到提交失败率超过 2%（且 5 分钟提交总量 ≥ 50）。
             该级别用于快速提示短时异常，便于及时关注。
         labels:
           severity: info

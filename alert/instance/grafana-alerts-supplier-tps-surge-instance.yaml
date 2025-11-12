@@ -44,7 +44,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -75,7 +75,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -92,7 +92,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m基线1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -152,7 +152,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "提交给供应商的TPS总量激增≥30% (Warning)"
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS总量激增≥30% (Warning)"
           description: |
             当前提交给供应商的TPS相对30m基线激增≥30%，且基线≥100 TPS，持续3分钟
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
@@ -184,7 +184,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -215,7 +215,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -232,7 +232,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m基线1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -292,7 +292,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "提交给供应商的TPS总量激增≥50% (High)"
+          summary: "供应商名称:{{$labels.name}} 供应商应用名称:{{$labels.appName}} 提交给供应商的TPS总量激增≥50% (High)"
           description: |
             当前提交给供应商的TPS相对30m基线激增≥50%，且基线≥100 TPS，持续3分钟
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
@@ -324,7 +324,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 100)
               interval: ""
               intervalMs: 1000
-              legendFormat: "激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -355,7 +355,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -372,7 +372,7 @@ groups:
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m基线1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m基线1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -432,7 +432,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "提交给供应商的TPS总量激增≥70% (Critical)"
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS总量激增≥70% (Critical)"
           description: |
             当前提交给供应商的TPS相对30m基线激增≥70%，且基线≥100 TPS，持续3分钟
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
@@ -497,7 +497,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -514,7 +514,7 @@ groups:
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 3m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 3m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -574,7 +574,7 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: "提交给供应商的TPS短时窗口激增告警"
+          summary: "供应商名称:{{name}} 供应商应用名称:{{appName}} 提交给供应商的TPS短时窗口激增告警"
           description: |
             当前提交给供应商的TPS超过3m平均值的50%，且绝对值≥100 TPS，持续2分钟
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
@@ -608,7 +608,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -639,7 +639,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -656,7 +656,7 @@ groups:
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -716,7 +716,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥30%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS激增≥30%"
           description: |-
             提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥30%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
@@ -749,7 +749,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -780,7 +780,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -797,7 +797,7 @@ groups:
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -857,9 +857,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥50%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS激增≥50%"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥50%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 基线≥20 TPS，持续3分钟
         labels:
@@ -890,7 +889,7 @@ groups:
                 and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -921,7 +920,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -938,7 +937,7 @@ groups:
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -998,9 +997,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}供应商的TPS激增≥70%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS激增≥70%"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥70%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 基线≥20 TPS，持续3分钟
         labels:
@@ -1031,7 +1029,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name }}-{{appName }} 当前TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前TPS"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -1062,7 +1060,7 @@ groups:
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -1079,7 +1077,7 @@ groups:
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} 3m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 3m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -1139,9 +1137,8 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: 提交给{{ $labels.name }}应用{{ $labels.appName }}供应商的短时窗口TPS激增
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的短时窗口TPS激增"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS超过3m平均值40%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 绝对值≥30 TPS，持续2分钟
         labels:
@@ -1174,7 +1171,7 @@ groups:
                 and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 10)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -1205,7 +1202,7 @@ groups:
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -1222,7 +1219,7 @@ groups:
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -1282,9 +1279,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥30%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥30%"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥30%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 基线≥10 TPS，持续3分钟
         labels:
@@ -1315,7 +1311,7 @@ groups:
                 and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -1346,7 +1342,7 @@ groups:
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -1363,7 +1359,7 @@ groups:
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -1423,9 +1419,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥50%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥50%"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥50%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 基线≥8 TPS，持续3分钟
         labels:
@@ -1456,7 +1451,7 @@ groups:
                 and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 激增比例(%)"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -1487,7 +1482,7 @@ groups:
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -1504,7 +1499,7 @@ groups:
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 30m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 30m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -1564,9 +1559,8 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的TPS激增≥70%
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥70%"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS激增≥70%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 基线≥8 TPS，持续3分钟
         labels:
@@ -1597,7 +1591,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前TPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 当前TPS"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -1628,7 +1622,7 @@ groups:
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 当前1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 当前1mTPS"
               maxDataPoints: 43200
               range: true
               refId: R
@@ -1645,7 +1639,7 @@ groups:
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[3m:1m])
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}}-{{connectId}} 3m平均1mTPS"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 3m平均1mTPS"
               maxDataPoints: 43200
               range: true
               refId: T
@@ -1705,9 +1699,8 @@ groups:
         execErrState: Error
         for: 2m
         annotations:
-          summary: 提交给{{ $labels.name }}-{{ $labels.appName }}-{{ $labels.connectId }}供应商的短时窗口TPS激增
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的短时窗口TPS激增"
           description: |-
-            提交给供应商{{ $labels.name }}应用{{ $labels.appName }}通道{{ $labels.connectId }}TPS超过3m平均值30%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
             条件: 绝对值≥5 TPS，持续2分钟
         labels:

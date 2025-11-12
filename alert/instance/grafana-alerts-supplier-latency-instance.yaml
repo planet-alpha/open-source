@@ -40,7 +40,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} p95"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} p95"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -86,7 +86,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: 供应商侧 p95 请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} p95 请求耗时过高"
           description: |
             最近 5 分钟内，供应商侧 p95 请求耗时超过阈值 600 ms。
             当前供应商侧 p95 请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
@@ -119,7 +119,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} p99"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} p99"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -165,7 +165,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: 供应商侧 p99 请求耗时严重升高 ({{ $labels.name }} / {{ $labels.appName }})
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} p99 请求耗时严重升高"
           description: |
             最近 5 分钟内，供应商侧 p99 请求耗时超过阈值 600 ms。
             当前供应商侧 p99 请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
@@ -197,7 +197,7 @@ groups:
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "{{name}}-{{appName}} avg"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} avg"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -243,7 +243,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: 供应商侧平均请求耗时过高 ({{ $labels.name }} / {{ $labels.appName }})
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 平均请求耗时过高"
           description: |
             最近 5 分钟内，供应商侧平均请求耗时超过阈值 600 ms。
             当前供应商侧平均请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
