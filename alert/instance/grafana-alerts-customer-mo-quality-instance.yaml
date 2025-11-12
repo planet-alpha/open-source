@@ -1,6 +1,6 @@
 # Grafana 上行（MO）质量类告警配置（Prometheus 数据源）
 # 说明：
-# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 1) 将 prometheus 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
 # 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
 # 3) 告警会出现在 "Business-MO-Quality" 文件夹下
 # 4) 环境变量（可在 Grafana 中设置或直接替换本文内变量）：
@@ -29,11 +29,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 成功率(%) = 100 * success / total（按 name, appName,cId,appId 聚合；遵循看板模板变量）
@@ -103,11 +103,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 差值比例(%) = 100 * clamp_min(req - resp, 0) / clamp_min(req, 1)
@@ -185,11 +185,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 错误率(%) = 100 * error / total（stat!="0" 视为错误）
@@ -258,11 +258,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 5m 瞬时速率 vs 1h 平均速率基线，按 (name, appName,cId,appId) 聚合
@@ -285,11 +285,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
@@ -319,11 +319,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName,cId,appId)(rate(customer_mo_req_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m] offset 1h))

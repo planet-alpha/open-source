@@ -31,11 +31,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -43,7 +43,7 @@ groups:
                     sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                     /
                     sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
-                  ) < 0.85
+                  ) < 0.30
                 )
                 and on (name, appName)
                 (
@@ -80,11 +80,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -101,11 +101,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
@@ -175,7 +175,7 @@ groups:
         annotations:
           summary: 供应商回执比例过低 ({{ $labels.name }} / {{ $labels.appName }})
           description: |
-            30 分钟内回执比例低于 85%
+            30 分钟内回执比例低于 30%
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -191,11 +191,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -203,7 +203,7 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
                     /
                     clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
-                  ) > 0.15
+                  ) > 0.40
                 )
                 and
                 (
@@ -236,11 +236,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -257,11 +257,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
@@ -331,7 +331,7 @@ groups:
         annotations:
           summary: 供应商回执超时比例过高 ({{ $labels.name }} / {{ $labels.appName }})
           description: |
-            30 分钟内超时比例超过 15%
+            30 分钟内超时比例超过 40%
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -347,11 +347,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -392,11 +392,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -413,11 +413,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
@@ -504,11 +504,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -549,11 +549,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -570,11 +570,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
@@ -660,11 +660,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -691,7 +691,7 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
                     /
                     clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m])), 1)
-                  ) > 0.05
+                  ) > 0.20
                 )
                 and
                 (
@@ -724,11 +724,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -745,11 +745,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[5m]))
@@ -762,11 +762,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -783,11 +783,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
@@ -887,7 +887,7 @@ groups:
         annotations:
           summary: 供应商回执失败率短时激增 ({{ $labels.name }} / {{ $labels.appName }})
           description: |
-            5 分钟失败率相对 30 分钟失败率出现倍增（> 2x），且短窗失败率超过 5%。
+            5 分钟失败率相对 30 分钟失败率出现倍增（> 2x），且短窗失败率超过 20%。
             【当前5m】失败率={{ $values.R5L.Value | printf "%.4f" }}，非超时总量={{ $values.T5L.Value | printf "%.0f" }}
             【基线30m】失败率={{ $values.R30L.Value | printf "%.4f" }}，非超时总量={{ $values.T30L.Value | printf "%.0f" }}
         labels:
@@ -904,11 +904,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -949,11 +949,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -970,11 +970,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
@@ -1061,11 +1061,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -1073,7 +1073,7 @@ groups:
                     sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                     /
                     sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
-                  ) < 0.85
+                  ) < 0.60
                 )
                 and on (name, appName, countryId)
                 (
@@ -1110,11 +1110,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -1131,11 +1131,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
@@ -1205,7 +1205,7 @@ groups:
         annotations:
           summary: 供应商回执回执比例过低 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})
           description: |
-            30 分钟内特定国家/地区的回执比例低于 85%
+            30 分钟内特定国家/地区的回执比例低于 60%
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总回执量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -1222,11 +1222,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -1234,7 +1234,7 @@ groups:
                     sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
                     /
                     clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
-                  ) > 0.15
+                  ) > 0.50
                 )
                 and
                 (
@@ -1267,11 +1267,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (
@@ -1288,11 +1288,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
@@ -1362,7 +1362,7 @@ groups:
         annotations:
           summary: 供应商回执超时比例过高 - 按国家/地区 ({{ $labels.name }} / {{ $labels.appName }} / {{ $labels.countryId }})
           description: |
-            30 分钟内特定国家/地区的超时比例超过 15%
+            30 分钟内特定国家/地区的超时比例超过 50%
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning

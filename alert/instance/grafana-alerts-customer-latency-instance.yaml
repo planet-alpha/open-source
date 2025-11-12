@@ -1,6 +1,6 @@
 ﻿# Grafana 客户侧请求耗时（p95/p99/平均）告警配置 (Prometheus 数据源)
 # 使用说明：
-# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 1) 将 prometheus 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
 # 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
 # 3) 告警将出现在 "Business-Latency" 文件夹下
 # 4) 可通过环境变量定制阈值或评估窗口：
@@ -26,11 +26,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 histogram_quantile(
@@ -106,11 +106,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 histogram_quantile(
@@ -186,11 +186,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 (

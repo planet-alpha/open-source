@@ -1,6 +1,6 @@
 # Grafana 客户侧交付成功率与提交失败率告警配置（Prometheus 数据源）
 # 说明：
-# 1) 将 P1809F7CD0C75ACF3 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
+# 1) 将 prometheus 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
 # 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana
 # 3) 文件内包含两个告警组：交付成功率过低、提交失败率信息级（5m）
 
@@ -21,11 +21,11 @@ groups:
             relativeTimeRange:
               from: 600
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 成功率(%) = 100 * success / total
@@ -96,11 +96,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 # 计算回执下降比例(%)，相对30m动态基线，并应用双门槛过滤
@@ -163,11 +163,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 100 * (
@@ -188,11 +188,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               editorMode: code
               expr: |
                 100 * avg_over_time((

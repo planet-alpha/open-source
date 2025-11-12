@@ -1,6 +1,6 @@
 # Grafana 供应商侧TPS激增告警配置
 # 使用说明：
-# 1. 替换 P1809F7CD0C75ACF3 为你的Prometheus数据源UID（在Grafana设置->数据源中查看）
+# 1. 替换 prometheus 为你的Prometheus数据源UID（在Grafana设置->数据源中查看）
 # 2. 复制文件到Grafana provisioning目录（如 /etc/grafana/provisioning/alerting/）
 # 3. 重启或重新加载Grafana
 # 4. 告警将出现在"Business-Supplier-TPS-Surge"文件夹下
@@ -30,11 +30,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -66,11 +66,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -83,11 +83,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
@@ -170,11 +170,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -206,11 +206,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -223,11 +223,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
@@ -310,11 +310,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -346,11 +346,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -363,11 +363,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(avg_over_time(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])[30m:1m]))
               interval: ""
@@ -452,11 +452,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
                 and on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 100)
@@ -488,11 +488,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -505,11 +505,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
               interval: ""
@@ -594,11 +594,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -630,11 +630,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -647,11 +647,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
@@ -735,11 +735,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -771,11 +771,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -788,11 +788,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
@@ -876,11 +876,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -912,11 +912,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -929,11 +929,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m])
               interval: ""
@@ -1017,11 +1017,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
                 and on(name, appName) (sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 30)
@@ -1053,11 +1053,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
               interval: ""
@@ -1070,11 +1070,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[3m:1m])
               interval: ""
@@ -1160,11 +1160,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
@@ -1196,11 +1196,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
@@ -1213,11 +1213,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
@@ -1301,11 +1301,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
@@ -1337,11 +1337,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
@@ -1354,11 +1354,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
@@ -1442,11 +1442,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) 
@@ -1478,11 +1478,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
@@ -1495,11 +1495,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m])
               interval: ""
@@ -1583,11 +1583,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
                 and on(name, appName, connectId) (sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) >= 5)
@@ -1619,11 +1619,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
               interval: ""
@@ -1636,11 +1636,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[3m:1m])
               interval: ""

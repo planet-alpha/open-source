@@ -1,6 +1,6 @@
 # Grafana 客户侧TPS激增告警配置
 # 使用说明：
-# 1. 替换 P1809F7CD0C75ACF3 为你的Prometheus数据源UID（在Grafana设置->数据源中查看）
+# 1. 替换 prometheus 为你的Prometheus数据源UID（在Grafana设置->数据源中查看）
 # 2. 复制文件到Grafana provisioning目录（如 /etc/grafana/provisioning/alerting/）
 # 3. 重启或重新加载Grafana
 # 4. 告警将出现在"Business-TPS-Surge"文件夹下
@@ -30,11 +30,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -106,11 +106,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -182,11 +182,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -260,11 +260,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
                 and on() (sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 100)
@@ -338,11 +338,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -414,11 +414,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -490,11 +490,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -566,11 +566,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
                 and on(name, appName,cId,appId) (sum by(name, appName,cId,appId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 30)
@@ -644,11 +644,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -720,11 +720,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -796,11 +796,11 @@ groups:
             relativeTimeRange:
               from: 1800
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 (
                   sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) 
@@ -872,11 +872,11 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: P1809F7CD0C75ACF3
+            datasourceUid: prometheus
             model:
               datasource:
                 type: prometheus
-                uid: P1809F7CD0C75ACF3
+                uid: prometheus
               expr: |
                 sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))
                 and on(name, appName,cId,appId, connectId) (sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m])) >= 5)
