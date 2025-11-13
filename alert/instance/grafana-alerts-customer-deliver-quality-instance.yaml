@@ -56,7 +56,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [99]
+                    params: [70]
                     type: lt
                   operator:
                     type: and
@@ -77,7 +77,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 成功比例 ≤ 99%"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 成功比例 ≤ 70%"
           description: |
             当前成功比例：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：100，总量包含超时）。
             指标计算：成功率(%) = 100 × success(DELIVRD|ACCEPTD) / total(包含所有状态)

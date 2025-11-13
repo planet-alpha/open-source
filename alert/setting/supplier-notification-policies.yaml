@@ -41,7 +41,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - business-supplier-delivery
+              - Business-Delivery 
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 10m

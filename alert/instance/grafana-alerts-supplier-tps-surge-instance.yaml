@@ -1678,7 +1678,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [5]
+                    params: [50]
                     type: gt
                   operator:
                     type: and
@@ -1702,7 +1702,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的短时窗口TPS激增"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，3m平均1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 绝对值≥5 TPS，持续2分钟
+            条件: 绝对值≥50 TPS，持续2分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge

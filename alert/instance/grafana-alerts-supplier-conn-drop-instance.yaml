@@ -39,12 +39,22 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by (name, appName,cId,appId) (
-                  online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                (
+                  max by (name, appName,cId,appId) (
+                    online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                  )
+                  and on (name, appName, cId, appId)
+                  (
+                    max_over_time(
+                      max by (name, appName,cId,appId) (
+                        online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                      )[10m:1m]
+                    ) > bool 0
+                  )
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "实际 sum ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "实际 max ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -62,20 +72,32 @@ groups:
               editorMode: code
               expr: |
                 avg by (name, appName,cId,appId) (
-                  online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
+                  online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "基线 total avg ({{name}}-{{cId}}, {{appName}}-{{appId}}))"
+              legendFormat: "基线 total avg ({{name}}, {{appName}})"
               maxDataPoints: 43200
               range: true
               refId: B
-
-          # C: 差值序列（PromQL 直接计算 abs(sum(A) - avg(B))）
           - refId: C
             relativeTimeRange:
               from: 180
               to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: abs($A - $B)
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          - refId: ZE
+            relativeTimeRange:
+              from: 180
+              to: 0
             datasourceUid: prometheus
             model:
               datasource:
@@ -83,24 +105,38 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                abs(
-                  sum by (name, appName,cId,appId) (
-                    online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
-                  )
-                  -
-                  avg by (name, appName,cId,appId) (
-                    online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
-                  )
+                (
+                  max_over_time(
+                    (
+                      abs(
+                        (
+                          max by (name, appName,cId,appId) (
+                            online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                          )
+                          and on (name, appName, cId, appId)
+                          (
+                            max_over_time(
+                              max by (name, appName,cId,appId) (
+                                online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                              )[10m:1m]
+                            ) > bool 0
+                          )
+                        )
+                        - 
+                        avg by (name, appName,cId,appId) (
+                          online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
+                        )
+                      )
+                    )[3m:1m] offset 2m
+                  ) == bool 0
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "差值 |A-B| ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "3m等于判定 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
-              refId: C
 
-          # H: 等于判断的布尔序列（等于 0 记为 1，不等于记为 0）
-          - refId: H
+          - refId: ZN
             relativeTimeRange:
               from: 180
               to: 0
@@ -111,96 +147,38 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                (C == bool 0)
+                (
+                  min_over_time(
+                    (
+                      abs(
+                        (
+                          max by (name, appName,cId,appId) (
+                            online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                          )
+                          and on (name, appName, cId, appId)
+                          (
+                            max_over_time(
+                              max by (name, appName,cId,appId) (
+                                online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                              )[10m:1m]
+                            ) > bool 0
+                          )
+                        )
+                        - 
+                        avg by (name, appName,cId,appId) (
+                          online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
+                        )
+                      )
+                    )[2m:1m]
+                  ) > bool 0
+                )
               interval: ""
               intervalMs: 1000
-              legendFormat: "等于基线 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "2m不等于判定 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
-              refId: H
 
-          # I: 不等于判断的布尔序列（不等于 0 记为 1，等于记为 0）
-          - refId: I
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                (C > bool 0)
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "不等于基线 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: I
-
-          # J: 先前 3 分钟始终“等于” —— 使用 offset 将窗口对齐到最近 2 分钟之前
-          - refId: J
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                min_over_time(H[3m] offset 2m)
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "先前3m等于 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: J
-
-          # K: 最近 2 分钟始终“不等于”
-          - refId: K
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                min_over_time(I[2m])
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "最近2m不等于 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: K
-
-          # L: 状态机告警条件：J 与 K 同时为 1
-          - refId: L
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                J and K
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "告警条件 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: L
-
-          # D: 将 L 归约为单值（last），用于阈值判断
-          - refId: D
+          - refId: Z
             relativeTimeRange:
               from: 180
               to: 0
@@ -209,30 +187,15 @@ groups:
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: L
-              type: reduce
-              reducer: last
+              expression: $ZE && $ZN
+              type: math
             intervalMs: 1000
             maxDataPoints: 43200
 
-          # F: 将 A 归约为单值（last），用于注解显示
-          - refId: F
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: __expr__
-            model:
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              type: reduce
-              reducer: last
-            intervalMs: 1000
-            maxDataPoints: 43200
+          # 注解中直接使用 $values.A.Value / $values.B.Value，无需额外 reduce
 
-          # G: 将 B 归约为单值（last），用于注解显示
-          - refId: G
+          # R: Z 的归约（last），供 E 阈值判断使用
+          - refId: R
             relativeTimeRange:
               from: 180
               to: 0
@@ -241,7 +204,7 @@ groups:
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: B
+              expression: Z
               type: reduce
               reducer: last
             intervalMs: 1000
@@ -254,6 +217,7 @@ groups:
               to: 0
             datasourceUid: __expr__
             model:
+              expression: R
               conditions:
                 - evaluator:
                     params: [0]
@@ -261,14 +225,13 @@ groups:
                   operator:
                     type: and
                   query:
-                    params: [D]
+                    params: [R]
                   reducer:
                     type: last
                   type: query
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: D
               intervalMs: 1000
               maxDataPoints: 43200
               refId: E
@@ -279,7 +242,8 @@ groups:
         annotations:
           summary: 供应商名称:{{ $labels.name }} 供应商id :{{ $labels.cId }} 供应商应用名称:{{ $labels.appName }} 供应商应用id:{{ $labels.appId }} 断连
           description: |
-            【当前值】 实际连接数={{ $values.F.Value }}，标准连接数={{ $values.G.Value }}
+            【当前值】 实际连接数={{ $values.A.Value }}，标准连接数={{ $values.B.Value }}，差值={{ $values.C.Value }}
+            【判定】 ZE(3m等于)={{ $values.ZE.Value }}，ZN(2m不等于)={{ $values.ZN.Value }}
         labels:
           severity: warning
           category: business-supplier-app-connections
@@ -305,12 +269,22 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by (name, appName,cId,appId) (
-                  online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                (
+                  max by (name, appName,cId,appId) (
+                    online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                  )
+                  and on (name, appName, cId, appId)
+                  (
+                    max_over_time(
+                      max by (name, appName,cId,appId) (
+                        online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                      )[10m:1m]
+                    ) > bool 0
+                  )
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "实际 sum ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "实际 max ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -328,20 +302,32 @@ groups:
               editorMode: code
               expr: |
                 avg by (name, appName,cId,appId) (
-                  online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
+                  online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "基线 total avg ({{name}}-{{cId}}, {{appName}}-{{appId}}))"
+              legendFormat: "基线 total avg ({{name}}, {{appName}})"
               maxDataPoints: 43200
               range: true
               refId: B
-
-          # C: 差值序列（PromQL 直接计算 abs(sum(A) - avg(B))）
           - refId: C
             relativeTimeRange:
               from: 180
               to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: abs($A - $B)
+              type: math
+            intervalMs: 1000
+            maxDataPoints: 43200
+
+          - refId: ZRE_NE
+            relativeTimeRange:
+              from: 180
+              to: 0
             datasourceUid: prometheus
             model:
               datasource:
@@ -349,24 +335,38 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                abs(
-                  sum by (name, appName,cId,appId) (
-                    online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
-                  )
-                  -
-                  avg by (name, appName,cId,appId) (
-                    online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"}
-                  )
+                (
+                  min_over_time(
+                    (
+                      abs(
+                        (
+                          max by (name, appName,cId,appId) (
+                            online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                          )
+                          and on (name, appName, cId, appId)
+                          (
+                            max_over_time(
+                              max by (name, appName,cId,appId) (
+                                online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                              )[10m:1m]
+                            ) > bool 0
+                          )
+                        )
+                        - 
+                        avg by (name, appName,cId,appId) (
+                          online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
+                        )
+                      )
+                    )[2m:1m] offset 3m
+                  ) > bool 0
                 )
               interval: ""
               intervalMs: 1000
-              legendFormat: "差值 |A-B| ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "恢复阶段NE(2m不等于) ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
-              refId: C
 
-          # H: 等于判断的布尔序列
-          - refId: H
+          - refId: ZRE_EQ
             relativeTimeRange:
               from: 180
               to: 0
@@ -377,96 +377,38 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                (C == bool 0)
+                (
+                  max_over_time(
+                    (
+                      abs(
+                        (
+                          max by (name, appName,cId,appId) (
+                            online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                          )
+                          and on (name, appName, cId, appId)
+                          (
+                            max_over_time(
+                              max by (name, appName,cId,appId) (
+                                online_supplier_app{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}
+                              )[10m:1m]
+                            ) > bool 0
+                          )
+                        )
+                        - 
+                        avg by (name, appName,cId,appId) (
+                          online_supplier_app_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", total=~".*"} > 0
+                        )
+                      )
+                    )[3m:1m]
+                  ) == bool 0
+                )
               interval: ""
               intervalMs: 1000
-              legendFormat: "等于基线 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
+              legendFormat: "恢复阶段EQ(3m等于) ({{name}}-{{cId}}, {{appName}}-{{appId}})"
               maxDataPoints: 43200
               range: true
-              refId: H
 
-          # I: 不等于判断的布尔序列
-          - refId: I
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                (C > bool 0)
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "不等于基线 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: I
-
-          # M: 先前 2 分钟始终“不等于” —— 与后续 3 分钟“等于”序列相邻
-          - refId: M
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                min_over_time(I[2m] offset 3m)
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "先前2m不等于 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: M
-
-          # N: 最近 3 分钟始终“等于”
-          - refId: N
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                min_over_time(H[3m])
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "最近3m等于 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: N
-
-          # P: 恢复条件：M 与 N 同时为 1
-          - refId: P
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: prometheus
-            model:
-              datasource:
-                type: prometheus
-                uid: prometheus
-              editorMode: code
-              expr: |
-                M and N
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "恢复条件 ({{name}}-{{cId}}, {{appName}}-{{appId}})"
-              maxDataPoints: 43200
-              range: true
-              refId: P
-
-          # D: 将 P 归约为单值（last），用于阈值判断
-          - refId: D
+          - refId: ZR
             relativeTimeRange:
               from: 180
               to: 0
@@ -475,30 +417,15 @@ groups:
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: P
-              type: reduce
-              reducer: last
+              expression: $ZRE_NE && $ZRE_EQ
+              type: math
             intervalMs: 1000
             maxDataPoints: 43200
 
-          # F: 将 A 归约为单值（last），用于注解显示
-          - refId: F
-            relativeTimeRange:
-              from: 180
-              to: 0
-            datasourceUid: __expr__
-            model:
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              type: reduce
-              reducer: last
-            intervalMs: 1000
-            maxDataPoints: 43200
+          # 注解中直接使用 $values.A.Value / $values.B.Value，无需额外 reduce
 
-          # G: 将 B 归约为单值（last），用于注解显示
-          - refId: G
+          # R: ZR 的归约（last），供 E 阈值判断使用
+          - refId: R
             relativeTimeRange:
               from: 180
               to: 0
@@ -507,7 +434,7 @@ groups:
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: B
+              expression: ZR
               type: reduce
               reducer: last
             intervalMs: 1000
@@ -520,6 +447,7 @@ groups:
               to: 0
             datasourceUid: __expr__
             model:
+              expression: R
               conditions:
                 - evaluator:
                     params: [0]
@@ -527,14 +455,13 @@ groups:
                   operator:
                     type: and
                   query:
-                    params: [D]
+                    params: [R]
                   reducer:
                     type: last
                   type: query
               datasource:
                 type: __expr__
                 uid: __expr__
-              expression: D
               intervalMs: 1000
               maxDataPoints: 43200
               refId: E
@@ -545,7 +472,8 @@ groups:
         annotations:
           summary: 供应商名称:{{ $labels.name }} 供应商id :{{ $labels.cId }} 供应商应用名称:{{ $labels.appName }} 供应商应用id:{{ $labels.appId }} 连接恢复
           description: |
-            【当前值】 实际连接数={{ $values.F.Value }}，标准连接数={{ $values.G.Value }}
+            【当前值】 实际连接数={{ $values.A.Value }}，标准连接数={{ $values.B.Value }}，差值={{ $values.C.Value }}
+            【判定】 ZRE_NE(2m不等于)={{ $values.ZRE_NE.Value }}，ZRE_EQ(3m等于)={{ $values.ZRE_EQ.Value }}
         labels:
           severity: info
           category: business-supplier-app-connections

@@ -29,7 +29,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -49,7 +49,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -69,7 +69,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/bf99d439e67840f455e5cff31d843788"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -89,7 +89,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/bf99d439e67840f455e5cff31d843788"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -109,7 +109,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -129,7 +129,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -149,7 +149,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -169,7 +169,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -189,7 +189,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -209,7 +209,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/b3fda8231f522344ff9581242e77e939"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'

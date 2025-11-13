@@ -42,7 +42,7 @@ groups:
                   (
                     sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                     /
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                   ) < 0.85
                 )
                 and on (name, appName)
@@ -63,7 +63,7 @@ groups:
               refId: A
           - refId: C
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: __expr__
             model:
@@ -90,13 +90,34 @@ groups:
                 (
                   sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
+            interval: ""
+            intervalMs: 1000
+            maxDataPoints: 43200
+            range: true
+            refId: R
+          - refId: RMIN
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                min_over_time((
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                )[300s:])
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
-              refId: R
+              refId: RMIN
           - refId: T
             relativeTimeRange:
               from: 1800
@@ -128,6 +149,21 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: RR
+              type: reduce
+          - refId: RR_MIN 
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RMIN
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR_MIN
               type: reduce
           - refId: TT
             relativeTimeRange:
@@ -176,6 +212,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 回执比例过低"
           description: |
             30 分钟内回执比例低于 85%
+            【触发值】近5m最低比例={{ $values.RR_MIN.Value | printf "%.4f" }}
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -219,7 +256,7 @@ groups:
               refId: A
           - refId: C
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: __expr__
             model:
@@ -248,11 +285,34 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
+            interval: ""
+            intervalMs: 1000
+            maxDataPoints: 43200
+            range: true
+            refId: R
+          - refId: RMAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                max_over_time((
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  )
+                )[300s:])
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
-              refId: R
+              refId: RMAX
           - refId: T
             relativeTimeRange:
               from: 1800
@@ -284,6 +344,21 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: RR
+              type: reduce
+          - refId: RR_MAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RMAX
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR_MAX
               type: reduce
           - refId: TT
             relativeTimeRange:
@@ -332,6 +407,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 超时比例过高"
           description: |
             30 分钟内超时比例超过 15%
+            【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -619,7 +695,7 @@ groups:
               refId: A
           - refId: C
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: __expr__
             model:
@@ -648,11 +724,34 @@ groups:
                   /
                   clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
+            interval: ""
+            intervalMs: 1000
+            maxDataPoints: 43200
+            range: true
+            refId: R
+          - refId: RMAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                max_over_time((
+                  (
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  )
+                )[300s:])
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
-              refId: R
+              refId: RMAX
           - refId: T
             relativeTimeRange:
               from: 1800
@@ -684,6 +783,21 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: RR
+              type: reduce
+          - refId: RR_MAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RMAX
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR_MAX
               type: reduce
           - refId: TT
             relativeTimeRange:
@@ -732,6 +846,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 失败比例过高"
           description: |
             30 分钟内特定国家/地区的失败比例超过 10%
+            【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】失败比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -759,7 +874,7 @@ groups:
                   (
                     sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                     /
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                   ) < 0.85
                 )
                 and on (name, appName, countryId)
@@ -780,7 +895,7 @@ groups:
               refId: A
           - refId: C
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: __expr__
             model:
@@ -807,13 +922,34 @@ groups:
                 (
                   sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
               refId: R
+          - refId: RMIN
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                min_over_time((
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
+                  /
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                )[300s:])
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: RMIN
           - refId: T
             relativeTimeRange:
               from: 1800
@@ -845,6 +981,21 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: RR
+              type: reduce
+          - refId: RR_MIN
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RMIN
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR_MIN
               type: reduce
           - refId: TT
             relativeTimeRange:
@@ -893,6 +1044,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 回执比例过低"
           description: |
             30 分钟内特定国家/地区的回执比例低于 85%
+            【触发值】近5m最低比例={{ $values.RR_MIN.Value | printf "%.4f" }}
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总回执量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
@@ -937,7 +1089,7 @@ groups:
               refId: A
           - refId: C
             relativeTimeRange:
-              from: 1800
+              from: 300
               to: 0
             datasourceUid: __expr__
             model:
@@ -966,11 +1118,34 @@ groups:
                   /
                   clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
+            interval: ""
+            intervalMs: 1000
+            maxDataPoints: 43200
+            range: true
+            refId: R
+          - refId: RMAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                max_over_time((
+                  (
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  )
+                )[300s:])
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
-              refId: R
+              refId: RMAX
           - refId: T
             relativeTimeRange:
               from: 1800
@@ -1002,6 +1177,21 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: RR
+              type: reduce
+          - refId: RR_MAX
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: RMAX
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: RR_MAX
               type: reduce
           - refId: TT
             relativeTimeRange:
@@ -1050,6 +1240,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 超时比例过高"
           description: |
             30 分钟内特定国家/地区的超时比例超过 15%
+            【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
