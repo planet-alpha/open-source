@@ -1,0 +1,1453 @@
+# Grafana 供应商投递稳健告警配置（Prometheus 数据源）
+# 可通过环境变量覆盖以下占位符：
+# - DS_PROMETHEUS_UID: Prometheus 数据源 UID
+# - SUCCESS_SLO: 成功率 SLO（默认 0.98）
+# - FAST_WINDOW: 快窗（默认 5m）
+# - SLOW_WINDOW: 慢窗（默认 1h）
+# - SLOW_WINDOW_2: 较长窗（默认 6h）
+# - BR_FAST: 快速燃尽阈值（默认 14）
+# - BR_SLOW: 慢速燃尽阈值（默认 6）
+# - ZSCORE_THRESHOLD: Z 分数阈值（默认 3）
+# - MIN_BASELINE_SHORT: 短窗最小基线总量（默认 30）
+# - MIN_BASELINE_LONG: 长窗最小基线总量（默认 100）
+
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Supplier Deliver Alerts (Robust)
+    folder: Business-Delivery
+    interval: 1m
+    rules:
+      - uid: sdr_slo_burn_fast
+        title: SupplierDeliverSLOBurnFast
+        condition: D
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      (
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                        /
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                      )
+                      /
+                      (1 - 0.98)
+                    ) > 14
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_fast"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: E5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E5
+          - refId: E60
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1h]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E60
+          - refId: BR5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E5 / (1 - 0.98)
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR5
+              type: math
+          - refId: BR60
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E60 / (1 - 0.98)
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR60
+              type: math
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(快速)"
+          description: |
+            快速窗口与慢窗口的错误率均超过 SLO 误差预算的燃尽阈值。
+            【燃尽】5m={{ $values.BR5.Value | printf "%.2f" }}，1h={{ $values.BR60.Value | printf "%.2f" }}（SLO=0.98）
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: slo_burn_fast
+
+      - uid: sdt_slo_burn_fast
+        title: SupplierDeliverTimeoutSLOBurnFast
+        condition: D
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      (
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                        /
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                      )
+                      /
+                      (1 - 0.98)
+                    ) > 14
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} timeout_slo_burn_fast"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: E5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E5
+          - refId: E60
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[1h]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E60
+          - refId: BR5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E5 / (1 - 0.98)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR5
+              type: math
+          - refId: BR60
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E60 / (1 - 0.98)
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR60
+              type: math
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 超时SLO燃尽(快速)"
+          description: |
+            快速窗口与慢窗口的超时率均超过 SLO 误差预算的燃尽阈值。
+            【燃尽】5m={{ $values.BR5.Value | printf "%.2f" }}，1h={{ $values.BR60.Value | printf "%.2f" }}（SLO=0.98）
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: timeout_slo_burn_fast
+
+      - uid: sd_failure_z_anomaly
+        title: SupplierDeliverFailureZScoreAnomaly
+        condition: D
+        data:
+          - refId: ER5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER5
+          - refId: ER1M
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER1M
+          - refId: AVG1H
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                avg_over_time((
+                  (
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                  )
+                )[1h:])
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: AVG1H
+          - refId: STD1H
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                clamp_min(stddev_over_time((
+                  (
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                  )
+                )[1h:]), 0.01)
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: STD1H
+          - refId: Z
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ($ER5 - $AVG1H) / $STD1H
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: Z
+              type: math
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  ( (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                  ) >= 30 )
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: D
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+          - refId: X
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      /
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                    )
+                    -
+                    avg_over_time((
+                      (
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        /
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                      )
+                    )[1h:])
+                  )
+                  /
+                  clamp_min(stddev_over_time((
+                    (
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                    )
+                  )[1h:]), 0.01)
+                ) > 3
+                and on (name, appName)
+                (
+                  (
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  ) > 0.05
+                )
+                and on (name, appName)
+                (
+                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: X
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: X
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 失败率异常(Z分数)"
+          description: |
+            短窗失败率相对长窗均值显著偏高。
+            【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=3）
+            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【1h均值】={{ $values.AVG1H.Value | printf "%.4f" }}，【1h标准差】={{ $values.STD1H.Value | printf "%.4f" }}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: failure_z_anomaly
+
+      - uid: sdr_receipt_rate_low_smooth
+        title: SupplierDeliverReceiptRateLowSmooth
+        condition: D
+        data:
+          - refId: R1M
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: R1M
+          - refId: R10M
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                avg_over_time((
+                  (
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                  )
+                )[10m:])
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: R10M
+          - refId: T30M
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: T30M
+          - refId: X
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  avg_over_time((
+                    (
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                    )
+                  )[10m:]) < 0.85
+                )
+                and on (name, appName)
+                (
+                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: X
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: X
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 回执比例过低(平滑)"
+          description: |
+            10 分钟平滑回执比例低于 85%，且 30 分钟总量满足基线。
+            【当前10m回执比例】={{ $values.R10M.Value | printf "%.4f" }}，【30m总量】={{ $values.T30M.Value | printf "%.0f" }}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: receipt_rate_low_smooth
+
+      - uid: sdr_slo_burn_slow_30m
+        title: SupplierDeliverSLOBurnSlow30m
+        condition: D
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      (
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[30m]))
+                        /
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                      )
+                      /
+                      (1 - 0.98)
+                    ) > 6
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_slow_30m"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: E30
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[30m]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E30
+          - refId: BR30
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E30 / (1 - 0.98)
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR30
+              type: math
+          - refId: C
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 30m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(慢速30m)"
+          description: |
+            30分钟窗口错误率超过 SLO 误差预算的慢速燃尽阈值。
+            【燃尽】30m={{ $values.BR30.Value | printf "%.2f" }}（SLO=0.98）
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: slo_burn_slow_30m
+
+      - uid: sdr_slo_burn_slow_6h
+        title: SupplierDeliverSLOBurnSlow6h
+        condition: D
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 21600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      (
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[6h]))
+                        /
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])), 1)
+                      )
+                      /
+                      (1 - 0.98)
+                    ) > 6
+                  )
+                  and on (name, appName)
+                  (
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])) >= 100
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_slow_6h"
+              maxDataPoints: 43200
+              range: true
+              refId: A
+          - refId: E6H
+            relativeTimeRange:
+              from: 21600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[6h]))
+                  /
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: E6H
+          - refId: BR6H
+            relativeTimeRange:
+              from: 21600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: $E6H / (1 - 0.98)
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR6H
+              type: math
+          - refId: C
+            relativeTimeRange:
+              from: 21600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 21600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 1h
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(慢速6h)"
+          description: |
+            6小时窗口错误率超过 SLO 误差预算的慢速燃尽阈值。
+            【燃尽】6h={{ $values.BR6H.Value | printf "%.2f" }}（SLO=0.98）
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: slo_burn_slow_6h
+
+      - uid: sd_failure_z_anomaly_by_country_default
+        title: SupplierDeliverFailureZScoreAnomalyByCountryDefault
+        condition: D
+        data:
+          - refId: ER5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER5
+          - refId: ER1M
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER1M
+          - refId: AVG
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                avg_over_time((
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                  )
+                )[1h:])
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: AVG
+          - refId: STD
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                clamp_min(stddev_over_time((
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                  )
+                )[1h:]), 0.01)
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: STD
+          - refId: Z
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ($ER5 - $AVG) / $STD
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: Z
+              type: math
+          - refId: BASE
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: BASE
+          - refId: X
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      /
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                    )
+                    -
+                    avg_over_time((
+                      (
+                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        /
+                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                      )
+                    )[1h:])
+                  )
+                  /
+                  clamp_min(stddev_over_time((
+                    (
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                    )
+                  )[1h:]), 0.01)
+                ) > 3
+                and on (name, appName, countryId)
+                (
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                  ) > 0.05
+                )
+                and on (name, appName, countryId)
+                (
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])) >= 30
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: X
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: X
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 失败率异常(Z分数-默认)"
+          description: |
+            国家维度短窗失败率相对长窗均值显著偏高（默认阈值与平滑）。
+            【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=3）
+            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【均值】={{ $values.AVG.Value | printf "%.4f" }}，【标准差】={{ $values.STD.Value | printf "%.4f" }}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: failure_z_anomaly_by_country_default
+          country_id: "{{ $labels.countryId }}"
+
+      - uid: sd_failure_z_anomaly_by_country_highvar
+        title: SupplierDeliverFailureZScoreAnomalyByCountryHighVariance
+        condition: D
+        data:
+          - refId: ER5
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  /
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER5
+          - refId: ER1M
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  /
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: ER1M
+          - refId: AVG
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                avg_over_time((
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                  )
+                )[2h:])
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: AVG
+          - refId: STD
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                clamp_min(stddev_over_time((
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                  )
+                )[2h:]), 0.01)
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: STD
+          - refId: Z
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ($ER5 - $AVG) / $STD
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: Z
+              type: math
+          - refId: BASE
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m]))
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: BASE
+          - refId: X
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                (
+                  (
+                    (
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      /
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                    )
+                    -
+                    avg_over_time((
+                      (
+                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        /
+                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                      )
+                    )[2h:])
+                  )
+                  /
+                  clamp_min(stddev_over_time((
+                    (
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      /
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                    )
+                  )[2h:]), 0.01)
+                ) > 4
+                and on (name, appName, countryId)
+                (
+                  (
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    /
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                  ) > 0.05
+                )
+                and on (name, appName, countryId)
+                (
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])) >= 30
+                )
+              interval: ""
+              intervalMs: 1000
+              maxDataPoints: 43200
+              range: true
+              refId: X
+          - refId: C
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: X
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: reduce
+          - refId: D
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: [0]
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params: [C]
+                  reducer:
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: C
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: D
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 3m
+        annotations:
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 失败率异常(Z分数-高波动)"
+          description: |
+            高波动国家的短窗失败率相对长窗均值显著偏高（更高阈值与更长平滑）。
+            【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=4）
+            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【均值】={{ $values.AVG.Value | printf "%.4f" }}，【标准差】={{ $values.STD.Value | printf "%.4f" }}
+        labels:
+          severity: warning
+          category: delivery
+          alert_type: failure_z_anomaly_by_country_highvar
+          country_id: "{{ $labels.countryId }}"
