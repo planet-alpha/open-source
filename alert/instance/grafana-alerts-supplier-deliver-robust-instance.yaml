@@ -56,11 +56,11 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
                   )
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_fast"
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: A
           - refId: E5
             relativeTimeRange:
@@ -78,10 +78,10 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                 )
-              interval: ""
+              interval: "5s"
               intervalMs: 1000
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: E5
           - refId: E60
             relativeTimeRange:
@@ -99,10 +99,10 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: E60
           - refId: BR5
             relativeTimeRange:
@@ -134,6 +134,36 @@ groups:
               maxDataPoints: 43200
               refId: BR60
               type: math
+          - refId: BR5_L
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR5
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR5_L
+              type: reduce
+          - refId: BR60_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR60
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR60_L
+              type: reduce
           - refId: C
             relativeTimeRange:
               from: 300
@@ -181,7 +211,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(快速)"
           description: |
             快速窗口与慢窗口的错误率均超过 SLO 误差预算的燃尽阈值。
-            【燃尽】5m={{ $values.BR5.Value | printf "%.2f" }}，1h={{ $values.BR60.Value | printf "%.2f" }}（SLO=0.98）
+            【燃尽】5m={{ $values.BR5_L.Value | printf "%.2f" }}，1h={{ $values.BR60_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
           category: delivery
@@ -223,11 +253,11 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
                   )
                 )
-              interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} timeout_slo_burn_fast"
+              interval: "30s"
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: A
           - refId: E5
             relativeTimeRange:
@@ -245,10 +275,10 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                 )
-              interval: ""
+              interval: "5s"
               intervalMs: 1000
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: E5
           - refId: E60
             relativeTimeRange:
@@ -266,10 +296,10 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
-              range: true
+              range: false
               refId: E60
           - refId: BR5
             relativeTimeRange:
@@ -299,6 +329,36 @@ groups:
               maxDataPoints: 43200
               refId: BR60
               type: math
+          - refId: BR5_L
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR5
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR5_L
+              type: reduce
+          - refId: BR60_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR60
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR60_L
+              type: reduce
           - refId: C
             relativeTimeRange:
               from: 300
@@ -346,7 +406,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 超时SLO燃尽(快速)"
           description: |
             快速窗口与慢窗口的超时率均超过 SLO 误差预算的燃尽阈值。
-            【燃尽】5m={{ $values.BR5.Value | printf "%.2f" }}，1h={{ $values.BR60.Value | printf "%.2f" }}（SLO=0.98）
+            【燃尽】5m={{ $values.BR5_L.Value | printf "%.2f" }}，1h={{ $values.BR60_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
           category: delivery
@@ -372,7 +432,7 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                 )
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -393,7 +453,7 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -416,7 +476,7 @@ groups:
                     clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
                   )
                 )[1h:])
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -439,11 +499,56 @@ groups:
                     clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
                   )
                 )[1h:]), 0.01)
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
               refId: STD1H
+          - refId: ER5_L
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ER5
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: ER5_L
+              type: reduce
+          - refId: AVG1H_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: AVG1H
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: AVG1H_L
+              type: reduce
+          - refId: STD1H_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: STD1H
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: STD1H_L
+              type: reduce
           - refId: Z
             relativeTimeRange:
               from: 300
@@ -553,7 +658,7 @@ groups:
                 (
                   sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -581,7 +686,7 @@ groups:
           description: |
             短窗失败率相对长窗均值显著偏高。
             【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=3）
-            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【1h均值】={{ $values.AVG1H.Value | printf "%.4f" }}，【1h标准差】={{ $values.STD1H.Value | printf "%.4f" }}
+            【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【1h均值】={{ $values.AVG1H_L.Value | printf "%.4f" }}，【1h标准差】={{ $values.STD1H_L.Value | printf "%.4f" }}
         labels:
           severity: warning
           category: delivery
@@ -652,6 +757,36 @@ groups:
               maxDataPoints: 43200
               range: true
               refId: T30M
+          - refId: R10M_L
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: R10M
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: R10M_L
+              type: reduce
+          - refId: T30M_L
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: T30M
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: T30M_L
+              type: reduce
           - refId: X
             relativeTimeRange:
               from: 1800
@@ -728,7 +863,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 回执比例过低(平滑)"
           description: |
             10 分钟平滑回执比例低于 85%，且 30 分钟总量满足基线。
-            【当前10m回执比例】={{ $values.R10M.Value | printf "%.4f" }}，【30m总量】={{ $values.T30M.Value | printf "%.0f" }}
+            【当前10m回执比例】={{ $values.R10M_L.Value | printf "%.4f" }}，【30m总量】={{ $values.T30M_L.Value | printf "%.0f" }}
         labels:
           severity: warning
           category: delivery
@@ -766,9 +901,9 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
                   )
                 )
-              interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_slow_30m"
+              interval: "5s"
               maxDataPoints: 43200
               range: true
               refId: A
@@ -788,7 +923,7 @@ groups:
                   /
                   clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
-              interval: ""
+              interval: "5s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -808,6 +943,21 @@ groups:
               maxDataPoints: 43200
               refId: BR30
               type: math
+          - refId: BR30_L
+            relativeTimeRange:
+              from: 1800
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR30
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR30_L
+              type: reduce
           - refId: C
             relativeTimeRange:
               from: 1800
@@ -855,7 +1005,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(慢速30m)"
           description: |
             30分钟窗口错误率超过 SLO 误差预算的慢速燃尽阈值。
-            【燃尽】30m={{ $values.BR30.Value | printf "%.2f" }}（SLO=0.98）
+            【燃尽】30m={{ $values.BR30_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
           category: delivery
@@ -867,7 +1017,7 @@ groups:
         data:
           - refId: A
             relativeTimeRange:
-              from: 21600
+              from: 7200
               to: 0
             datasourceUid: prometheus
             model:
@@ -880,9 +1030,9 @@ groups:
                   (
                     (
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[6h]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[2h]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])), 1)
                       )
                       /
                       (1 - 0.98)
@@ -890,18 +1040,18 @@ groups:
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])) >= 100
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])) >= 100
                   )
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
-              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_slow_6h"
+              legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} slo_burn_slow_2h"
               maxDataPoints: 43200
               range: true
               refId: A
           - refId: E6H
             relativeTimeRange:
-              from: 21600
+              from: 7200
               to: 0
             datasourceUid: prometheus
             model:
@@ -911,18 +1061,18 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[6h]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[2h]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[6h])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])), 1)
                 )
-              interval: ""
+              interval: "30s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
               refId: E6H
           - refId: BR6H
             relativeTimeRange:
-              from: 21600
+              from: 7200
               to: 0
             datasourceUid: __expr__
             model:
@@ -935,9 +1085,24 @@ groups:
               maxDataPoints: 43200
               refId: BR6H
               type: math
+          - refId: BR6H_L
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: BR6H
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: BR6H_L
+              type: reduce
           - refId: C
             relativeTimeRange:
-              from: 21600
+              from: 7200
               to: 0
             datasourceUid: __expr__
             model:
@@ -952,7 +1117,7 @@ groups:
               type: reduce
           - refId: D
             relativeTimeRange:
-              from: 21600
+              from: 7200
               to: 0
             datasourceUid: __expr__
             model:
@@ -977,12 +1142,12 @@ groups:
               type: threshold
         noDataState: OK
         execErrState: Error
-        for: 1h
+        for: 30m
         annotations:
-          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(慢速6h)"
+          summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 成功率SLO燃尽(慢速2h)"
           description: |
-            6小时窗口错误率超过 SLO 误差预算的慢速燃尽阈值。
-            【燃尽】6h={{ $values.BR6H.Value | printf "%.2f" }}（SLO=0.98）
+            2小时窗口错误率超过 SLO 误差预算的慢速燃尽阈值。
+            【燃尽】2h={{ $values.BR6H_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
           category: delivery
@@ -1008,7 +1173,7 @@ groups:
                   /
                   clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
                 )
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -1029,7 +1194,7 @@ groups:
                   /
                   clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
                 )
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -1052,7 +1217,7 @@ groups:
                     clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
                   )
                 )[1h:])
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -1075,11 +1240,56 @@ groups:
                     clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
                   )
                 )[1h:]), 0.01)
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
               refId: STD
+          - refId: ER5_L
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ER5
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: ER5_L
+              type: reduce
+          - refId: AVG_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: AVG
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: AVG_L
+              type: reduce
+          - refId: STD_L
+            relativeTimeRange:
+              from: 3600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: STD
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: STD_L
+              type: reduce
           - refId: Z
             relativeTimeRange:
               from: 300
@@ -1107,7 +1317,7 @@ groups:
               editorMode: code
               expr: |
                 sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m]))
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -1160,7 +1370,7 @@ groups:
                 (
                   sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])) >= 30
                 )
-              interval: ""
+              interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
               range: true
@@ -1213,7 +1423,7 @@ groups:
           description: |
             国家维度短窗失败率相对长窗均值显著偏高（默认阈值与平滑）。
             【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=3）
-            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【均值】={{ $values.AVG.Value | printf "%.4f" }}，【标准差】={{ $values.STD.Value | printf "%.4f" }}
+            【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【均值】={{ $values.AVG_L.Value | printf "%.4f" }}，【标准差】={{ $values.STD_L.Value | printf "%.4f" }}
         labels:
           severity: warning
           category: delivery
@@ -1312,6 +1522,51 @@ groups:
               maxDataPoints: 43200
               range: true
               refId: STD
+          - refId: ER5_L
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: ER5
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: ER5_L
+              type: reduce
+          - refId: AVG_L
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: AVG
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: AVG_L
+              type: reduce
+          - refId: STD_L
+            relativeTimeRange:
+              from: 7200
+              to: 0
+            datasourceUid: __expr__
+            model:
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: STD
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: STD_L
+              type: reduce
           - refId: Z
             relativeTimeRange:
               from: 300
@@ -1445,7 +1700,7 @@ groups:
           description: |
             高波动国家的短窗失败率相对长窗均值显著偏高（更高阈值与更长平滑）。
             【Z】={{ $values.Z.Value | printf "%.2f" }}（阈值=4）
-            【当前5m失败率】={{ $values.ER5.Value | printf "%.4f" }}，【均值】={{ $values.AVG.Value | printf "%.4f" }}，【标准差】={{ $values.STD.Value | printf "%.4f" }}
+            【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【均值】={{ $values.AVG_L.Value | printf "%.4f" }}，【标准差】={{ $values.STD_L.Value | printf "%.4f" }}
         labels:
           severity: warning
           category: delivery
