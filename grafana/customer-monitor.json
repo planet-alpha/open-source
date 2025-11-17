@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 27,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -55,6 +55,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -69,7 +70,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -96,16 +98,16 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum(online_customer_app{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}) by (name, appName)",
+          "expr": "abs(\r\n    (\r\n      max by (name, appName,cId,appId) (\r\n        online_supplier_app{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}\r\n      )\r\n      and on (name, appName, cId, appId)\r\n      (\r\n        max_over_time(\r\n          max by (name, appName,cId,appId) (\r\n            online_supplier_app{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\"}\r\n          )[10m:1m]\r\n        ) > bool 0\r\n      )\r\n    )\r\n    - \r\n    avg by (name, appName,cId,appId) (\r\n      online_supplier_app_total{cId=~\".*\", name=~\".*\", appId=~\".*\", appName=~\".*\", protocol=~\".*\", total=~\".*\"} > 0\r\n    )\r\n  )>0",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "{{name}}-{{appName}}",
@@ -114,7 +116,7 @@
           "useBackend": false
         }
       ],
-      "title": "应用连接信息",
+      "title": "连接数异常应用",
       "type": "timeseries"
     },
     {
@@ -151,6 +153,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -165,7 +168,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -196,7 +200,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -256,6 +260,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -270,7 +275,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -297,11 +303,11 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -348,6 +354,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -362,7 +369,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -394,56 +402,23 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
-          "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^timeout$\"}[1m]))\n/\nclamp_min(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])), 1)",
-          "legendFormat": "{{appName}}-回执比例",
-          "range": true,
-          "refId": "A"
-        },
-        {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))",
+          "expr": "# 高TPS场景（TPS > 1）：使用1分钟窗口\n(\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[1m]))\n /\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))\n) \nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 1)\n\nor\n\n# 中TPS场景（TPS <= 1）：使用5分钟窗口\n(\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[5m]))\n /\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[5m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 1 and sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 0.1)\n\nor\n\n# 低TPS场景（TPS <= 0.1）：使用30分钟窗口\n(\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[30m]))\n /\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[30m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 0.1)",
           "hide": false,
           "instant": false,
-          "legendFormat": "{{appName}}-成功比例",
+          "legendFormat": "{{appName}}",
           "range": true,
           "refId": "B"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{appName}}-失败比例",
-          "range": true,
-          "refId": "C"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^timeout$\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "{{appName}}-超时未返回比例",
-          "range": true,
-          "refId": "D"
         }
       ],
-      "title": "DR回执情况",
+      "title": "DR回执成功情况",
       "type": "timeseries"
     },
     {
@@ -480,6 +455,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -494,7 +470,223 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "# 高TPS场景（TPS > 1）：使用1分钟窗口\n(\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[1m]))\n /\n clamp_min(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])), 1)\n) \nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 1)\n\nor\n\n# 中TPS场景（TPS <= 1）：使用5分钟窗口\n(\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[5m]))\n /\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[5m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 1 and sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 0.1)\n\nor\n\n# 低TPS场景（TPS <= 0.1）：使用30分钟窗口\n(\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^(DELIVRD|ACCEPTD|timeout)$\"}[30m]))\n /\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[30m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 0.1)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{appName}}-失败比例",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "# 高TPS场景（TPS > 1）：使用1分钟窗口\n(\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^timeout$\"}[1m]))\n /\n clamp_min(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])), 1)\n) \nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 1)\n\nor\n\n# 中TPS场景（TPS <= 1）：使用5分钟窗口\n(\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^timeout$\"}[5m]))\n /\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[5m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 1 and sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 0.1)\n\nor\n\n# 低TPS场景（TPS <= 0.1）：使用30分钟窗口\n(\nsum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat=~\"^timeout$\"}[30m]))\n /\n sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[30m]))\n)\nand \n(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 0.1)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{appName}}-60秒未返回dr比例",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "DR回执失败情况",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "asc"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "# 高TPS场景（TPS > 1）：使用1分钟窗口\n(\n sum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[1m]))\n /\n clamp_min(sum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\"}[1m])), 1)\n) \nand \n(sum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\"}[1m])) > 1)\n\nor\n\n# 中TPS场景（TPS <= 1）：使用5分钟窗口\n(\nsum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[5m]))\n /\nsum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\"}[5m]))\n)\nand \n(sum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) <= 1 and sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m])) > 0.1)\n\nor\n\n# 低TPS场景（TPS <= 0.1）：使用30分钟窗口\n(\nsum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\", stat=~\"^(DELIVRD|ACCEPTD)$\"}[30m]))\n /\nsum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\"}[30m]))\n)\nand \n(sum by(name, appName, countryId)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", countryId=~\"$countryId\"}[1m])) <= 0.1)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{appName}}-{{countryId}}",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "DR回执成功情况(国家级)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -510,7 +702,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 16
       },
       "id": 6,
       "options": {
@@ -526,12 +718,12 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum(rate(customer_deliver_duration_ms_bucket{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])) by (le, name, appName))",
-          "legendFormat": "{{name}}-{{appName}} 95分位",
+          "legendFormat": "{{appName}} 95分位",
           "range": true,
           "refId": "A"
         },
@@ -542,9 +734,9 @@
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum(rate(customer_deliver_duration_ms_bucket{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])) by (le, name, appName))",
-          "hide": false,
+          "hide": true,
           "instant": false,
-          "legendFormat": "{{name}}-{{appName}} 99分位",
+          "legendFormat": "{{appName}} 99分位",
           "range": true,
           "refId": "B"
         },
@@ -554,10 +746,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(customer_deliver_duration_ms_sum{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval]) / rate(customer_deliver_duration_ms_count{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])",
+          "expr": "sum by(cId, name, appId, appName, protocol)(\n  rate(customer_deliver_duration_ms_sum{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])\n)\n/\nclamp_min(\n  sum by(cId, name, appId, appName, protocol)(\n    rate(customer_deliver_duration_ms_count{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])\n  ),\n  1e-9\n)",
           "hide": false,
           "instant": false,
-          "legendFormat": "{{name}}-{{appName}} 平均耗时",
+          "legendFormat": "{{appName}} 平均耗时",
           "range": true,
           "refId": "C"
         }
@@ -599,6 +791,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -613,7 +806,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -629,7 +823,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 24
       },
       "id": 7,
       "options": {
@@ -645,13 +839,13 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum(rate(customer_request_duration_ms_bucket{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[1m])) by (le, name, appName))",
-          "hide": true,
-          "legendFormat": "{{name}}-{{appName}}95分位",
+          "hide": false,
+          "legendFormat": "{{appName}}95分位",
           "range": true,
           "refId": "A"
         },
@@ -662,9 +856,9 @@
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum(rate(customer_request_duration_ms_bucket{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[1m])) by (le, name, appName))",
-          "hide": false,
+          "hide": true,
           "instant": false,
-          "legendFormat": "{{name}}-{{appName}}95分位",
+          "legendFormat": "{{appName}}99分位",
           "range": true,
           "refId": "B"
         },
@@ -674,10 +868,10 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "rate(customer_request_duration_ms_sum{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval]) / rate(customer_request_duration_ms_count{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])",
+          "expr": "sum by(cId, name, appId, appName, protocol)(\n  rate(customer_request_duration_ms_sum{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])\n)\n/\nclamp_min(\n  sum by(cId, name, appId, appName, protocol)(\n    rate(customer_request_duration_ms_count{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", protocol=~\"$protocol\"}[$__rate_interval])\n  ),\n  1e-9\n)",
           "hide": false,
           "instant": false,
-          "legendFormat": "{{name}}-{{appName}}平均耗时",
+          "legendFormat": "{{appName}}平均耗时",
           "range": true,
           "refId": "C"
         }
@@ -719,6 +913,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -733,7 +928,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -749,7 +945,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 24
       },
       "id": 8,
       "options": {
@@ -765,12 +961,13 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by(name, appName)(increase(customer_deliver_resp_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))\n/\nclamp_min(sum by(name, appName)(increase(customer_deliver_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\", stat!~\"^timeout$\"}[1m])), 1)",
-          "legendFormat": "__auto",
+          "expr": "\n(\nsum by(name, appName)(increase(customer_deliver_resp_total{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))\n/\nsum by(name, appName)(increase(customer_deliver_send{cId=~\"$cId\", name=~\"$customerName\", appId=~\"$appId\", appName=~\"$customerAppName\"}[1m]))\n)",
+          "hide": false,
+          "legendFormat": "{{appName}}",
           "range": true,
           "refId": "A"
         }
@@ -793,6 +990,9 @@
             "cellOptions": {
               "type": "auto"
             },
+            "footer": {
+              "reducers": []
+            },
             "inspect": false
           },
           "mappings": [],
@@ -800,7 +1000,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -817,7 +1018,7 @@
             },
             "properties": [
               {
-                "id": "custom.hidden",
+                "id": "custom.hideFrom.viz",
                 "value": true
               }
             ]
@@ -829,7 +1030,7 @@
             },
             "properties": [
               {
-                "id": "custom.hidden",
+                "id": "custom.hideFrom.viz",
                 "value": true
               }
             ]
@@ -864,23 +1065,15 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 32
       },
       "id": 9,
       "options": {
         "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
+        "enablePagination": true,
         "showHeader": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -912,6 +1105,9 @@
               "type": "auto"
             },
             "filterable": false,
+            "footer": {
+              "reducers": []
+            },
             "inspect": false
           },
           "mappings": [],
@@ -919,7 +1115,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -936,7 +1133,7 @@
             },
             "properties": [
               {
-                "id": "custom.hidden",
+                "id": "custom.hideFrom.viz",
                 "value": true
               }
             ]
@@ -947,21 +1144,13 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 32
       },
       "id": 10,
       "interval": "15s",
       "options": {
         "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
+        "enablePagination": true,
         "showHeader": true,
         "sortBy": [
           {
@@ -970,7 +1159,7 @@
           }
         ]
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1041,6 +1230,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1055,7 +1245,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1070,7 +1261,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 40
       },
       "id": 11,
       "options": {
@@ -1086,7 +1277,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1133,6 +1324,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1147,7 +1339,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1162,7 +1355,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 32
+        "y": 40
       },
       "id": 12,
       "options": {
@@ -1178,7 +1371,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.2.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1207,7 +1400,7 @@
     }
   ],
   "preload": false,
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [],
   "templating": {
     "list": [
@@ -1321,16 +1514,36 @@
         ],
         "query": "smpp, http, cmpp",
         "type": "custom"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(customer_deliver_total,countryId)",
+        "includeAll": true,
+        "label": "国家id",
+        "name": "countryId",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(customer_deliver_total,countryId)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "customer-monitor",
   "uid": "smc-system-monitor",
-  "version": 9
+  "version": 1
 }
