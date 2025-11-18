@@ -1,4 +1,4 @@
-﻿# Grafana 客户侧应用连接数下降未恢复告警配置 (Prometheus 数据源)
+# Grafana 客户侧应用连接数下降未恢复告警配置 (Prometheus 数据源)
 # 使用说明：
 # 1) 将 prometheus 替换为你的 Prometheus 数据源 UID（Grafana -> 数据源 -> Prometheus -> UID）
 # 2) 将本文件放到 Grafana provisioning 目录（如 /etc/grafana/provisioning/alerting/），并重启/重新加载 Grafana

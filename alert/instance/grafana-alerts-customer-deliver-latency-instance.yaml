@@ -41,7 +41,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [20000], type: gt }
+                - evaluator: { params: [30000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -55,7 +55,7 @@ groups:
         execErrState: Error
         for: 3m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 20000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 30000ms"
         labels:
           severity: critical
           category: business-deliver-latency
@@ -64,6 +64,57 @@ groups:
       # ==================== p99 - High ====================
       - uid: deliver_latency_p99_high
         title: CustomerDeliverLatencyP99High
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              datasource: { type: prometheus, uid: prometheus }
+              editorMode: code
+              expr: |
+                histogram_quantile(0.99,
+                  sum by (le, name, appName,cId,appId) (
+                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
+                  )
+                )
+                and on (name, appName,cId,appId) (
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
+              instant: true
+              range: false
+              refId: A
+          - refId: C
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [20000], type: gt }
+                  operator: { type: and }
+                  query: { params: [A] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 5m
+        annotations:
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 20000ms"
+        labels:
+          severity: high
+          category: business-deliver-latency
+          alert_type: latency_p99
+
+      # ==================== p99 - Warning ====================
+      - uid: deliver_latency_p99_warning
+        title: CustomerDeliverLatencyP99Warning
         condition: C
         data:
           - refId: A
@@ -104,60 +155,9 @@ groups:
               type: threshold
         noDataState: OK
         execErrState: Error
-        for: 5m
-        annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 15000ms"
-        labels:
-          severity: high
-          category: business-deliver-latency
-          alert_type: latency_p99
-
-      # ==================== p99 - Warning ====================
-      - uid: deliver_latency_p99_warning
-        title: CustomerDeliverLatencyP99Warning
-        condition: C
-        data:
-          - refId: A
-            relativeTimeRange: { from: 600, to: 0 }
-            datasourceUid: prometheus
-            model:
-              datasource: { type: prometheus, uid: prometheus }
-              editorMode: code
-              expr: |
-                histogram_quantile(0.99,
-                  sum by (le, name, appName,cId,appId) (
-                    rate(customer_deliver_duration_ms_bucket{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*"}[5m])
-                  )
-                )
-                and on (name, appName,cId,appId) (
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
-                )
-              interval: ""
-              intervalMs: 1000
-              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} p99"
-              instant: true
-              range: false
-              refId: A
-          - refId: C
-            relativeTimeRange: { from: 600, to: 0 }
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator: { params: [10000], type: gt }
-                  operator: { type: and }
-                  query: { params: [A] }
-                  reducer: { type: last }
-                  type: query
-              datasource: { type: __expr__, uid: __expr__ }
-              expression: A
-              intervalMs: 1000
-              refId: C
-              type: threshold
-        noDataState: OK
-        execErrState: Error
         for: 10m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 10000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p99 时延 ≥ 18000ms"
         labels:
           severity: warning
           category: business-deliver-latency
@@ -194,7 +194,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [8000], type: gt }
+                - evaluator: { params: [12000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -208,7 +208,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 8000ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 12000ms"
         labels:
           severity: high
           category: business-deliver-latency
@@ -245,7 +245,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [6500], type: gt }
+                - evaluator: { params: [9000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -259,7 +259,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 6500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} p95 时延 ≥ 9000ms"
         labels:
           severity: warning
           category: business-deliver-latency
@@ -296,7 +296,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [8500], type: gt }
+                - evaluator: { params: [12000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -310,7 +310,7 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 8500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 12000ms"
         labels:
           severity: high
           category: business-deliver-latency
@@ -347,7 +347,7 @@ groups:
             datasourceUid: __expr__
             model:
               conditions:
-                - evaluator: { params: [7500], type: gt }
+                - evaluator: { params: [10000], type: gt }
                   operator: { type: and }
                   query: { params: [A] }
                   reducer: { type: last }
@@ -361,7 +361,7 @@ groups:
         execErrState: Error
         for: 10m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 7500ms"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 平均时延 ≥ 10000ms"
         labels:
           severity: warning
           category: business-deliver-latency

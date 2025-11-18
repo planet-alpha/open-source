@@ -1,0 +1,15 @@
+{{- /* Example displaying the summary and description annotations of each alert in the notification. */ -}}
+{{- /* Edit the template name and template content as needed. */ -}}
+{{ define "custom.alerts" -}}
+{{ len .Alerts }} alert(s)
+{{ range .Alerts -}}
+  {{ template "alert.summary_and_description" . -}}
+{{ end -}}
+{{ end -}}
+
+{{ define "alert.summary_and_description" }}
+  Summary: {{.Annotations.summary}}
+  Time: {{(.StartsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}
+  Description: {{.Annotations.description}}
+  Silence: {{ .SilenceURL}}
+{{ end -}}

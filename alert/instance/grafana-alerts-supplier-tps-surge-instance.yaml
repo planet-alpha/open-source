@@ -1584,7 +1584,7 @@ groups:
                 uid: prometheus
               expr: |
                 sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
-                and on(name, appName, connectId) (sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) >= 5)
+                and on(name, appName, connectId) (sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m])) >= 50)
                 and on(name, appName, connectId) (
                   sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))
                 > avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[3m:1m]) * 1.3

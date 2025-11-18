@@ -40,19 +40,19 @@ groups:
               expr: |
                 (
                   (
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
+                    sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
-                  ) < 0.85
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  )
                 )
                 and on (name, appName)
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) > 0
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) > 0
                 )
                 and on (name, appName)
                 (
                   sum by(name, appName)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
                   ) >= 100
                 )
               interval: ""
@@ -88,9 +88,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
             interval: ""
             intervalMs: 1000
@@ -109,9 +109,9 @@ groups:
               editorMode: code
               expr: |
                 min_over_time((
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )[300s:])
               interval: ""
               intervalMs: 1000
@@ -129,7 +129,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -150,7 +150,7 @@ groups:
               maxDataPoints: 43200
               refId: RR
               type: reduce
-          - refId: RR_MIN 
+          - refId: RR_MIN
             relativeTimeRange:
               from: 300
               to: 0
@@ -188,8 +188,8 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0]
-                    type: gt
+                    params: [0.80]
+                    type: lt
                   operator:
                     type: and
                   query:
@@ -211,7 +211,7 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 回执比例过低"
           description: |
-            30 分钟内回执比例低于 85%
+            30 分钟内回执比例低于 80%
             【触发值】近5m最低比例={{ $values.RR_MIN.Value | printf "%.4f" }}
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
@@ -237,15 +237,15 @@ groups:
               expr: |
                 (
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
+                    sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
-                  ) > 0.15
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  )
                 )
                 and
                 (
                   sum by(name, appName)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])
                   ) >= 100
                 )
               interval: ""
@@ -281,9 +281,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
             interval: ""
             intervalMs: 1000
@@ -303,9 +303,9 @@ groups:
               expr: |
                 max_over_time((
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
+                    sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                   )
                 )[300s:])
               interval: ""
@@ -324,7 +324,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -383,7 +383,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0]
+                    params: [0.40]
                     type: gt
                   operator:
                     type: and
@@ -406,7 +406,7 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 超时比例过高"
           description: |
-            30 分钟内超时比例超过 15%
+            30 分钟内超时比例超过 40%
             【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
@@ -433,16 +433,16 @@ groups:
                 (
                   (
                     (
-                      sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                      sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
                       /
-                      clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                      clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                     )
                     /
                     clamp_min(
                       (
-                        sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                        sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
                         /
-                        clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                        clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                       ),
                       0.01
                     )
@@ -451,15 +451,15 @@ groups:
                 and
                 (
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                    sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
                     /
-                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                    clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                   ) > 0.05
                 )
                 and
                 (
                   sum by(name, appName)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
                   ) >= 30
                 )
               interval: ""
@@ -495,9 +495,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
                   /
-                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -515,7 +515,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -533,9 +533,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                  sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -553,7 +553,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -676,15 +676,15 @@ groups:
               expr: |
                 (
                   (
-                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
-                  ) > 0.10
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  )
                 )
                 and
                 (
                   sum by(name, appName, countryId)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
                   ) >= 100
                 )
               interval: ""
@@ -720,9 +720,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
             interval: ""
             intervalMs: 1000
@@ -742,9 +742,9 @@ groups:
               expr: |
                 max_over_time((
                   (
-                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                   )
                 )[300s:])
               interval: ""
@@ -763,7 +763,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -822,7 +822,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0]
+                    params: [0.10]
                     type: gt
                   operator:
                     type: and
@@ -872,19 +872,19 @@ groups:
               expr: |
                 (
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
-                  ) < 0.85
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  )
                 )
                 and on (name, appName, countryId)
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])) > 0
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])) > 0
                 )
                 and on (name, appName, countryId)
                 (
                   sum by(name, appName, countryId)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
                   ) >= 100
                 )
               interval: ""
@@ -920,9 +920,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -941,9 +941,9 @@ groups:
               editorMode: code
               expr: |
                 min_over_time((
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )[300s:])
               interval: ""
               intervalMs: 1000
@@ -961,7 +961,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -1020,8 +1020,8 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0]
-                    type: gt
+                    params: [0.85]
+                    type: lt
                   operator:
                     type: and
                   query:
@@ -1070,15 +1070,15 @@ groups:
               expr: |
                 (
                   (
-                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
-                  ) > 0.15
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  )
                 )
                 and
                 (
                   sum by(name, appName, countryId)(
-                    increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
+                    increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])
                   ) >= 100
                 )
               interval: ""
@@ -1114,9 +1114,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                 )
             interval: ""
             intervalMs: 1000
@@ -1136,9 +1136,9 @@ groups:
               expr: |
                 max_over_time((
                   (
-                    sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
+                    sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat=~"^timeout$"}[30m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m])), 1)
                   )
                 )[300s:])
               interval: ""
@@ -1157,7 +1157,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -1216,7 +1216,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0]
+                    params: [0.15]
                     type: gt
                   operator:
                     type: and

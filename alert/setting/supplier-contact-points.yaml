@@ -101,7 +101,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/2116e90c362261d7058349464bfb10a1"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'

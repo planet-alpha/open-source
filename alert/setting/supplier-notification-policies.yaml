@@ -85,7 +85,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - supplier_receipt_drop
+              - business-supplier-receipt
           group_wait: 2m
           group_interval: 10m
           repeat_interval: 30m

@@ -39,9 +39,9 @@ groups:
                   (
                     (
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                       )
                       /
                       (1 - 0.98)
@@ -49,11 +49,11 @@ groups:
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])) >= 30
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])) >= 100
                   )
                 )
               interval: "30s"
@@ -74,9 +74,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                 )
               interval: "5s"
               intervalMs: 1000
@@ -95,9 +95,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1h]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1h]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1h])), 1)
                 )
               interval: "30s"
               intervalMs: 1000
@@ -236,9 +236,9 @@ groups:
                   (
                     (
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$", smsType="0"}[5m]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                       )
                       /
                       (1 - 0.98)
@@ -246,11 +246,11 @@ groups:
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])) >= 30
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])) >= 100
                   )
                 )
               intervalMs: 1000
@@ -271,9 +271,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[5m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$", smsType="0"}[5m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                 )
               interval: "5s"
               intervalMs: 1000
@@ -292,9 +292,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$"}[1h]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^timeout$", smsType="0"}[1h]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1h])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1h])), 1)
                 )
               interval: "30s"
               intervalMs: 1000
@@ -428,9 +428,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                 )
               interval: "10s"
               intervalMs: 1000
@@ -449,9 +449,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                 )
               interval: "30s"
               intervalMs: 1000
@@ -471,9 +471,9 @@ groups:
               expr: |
                 avg_over_time((
                   (
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                   )
                 )[1h:])
               interval: "30s"
@@ -494,9 +494,9 @@ groups:
               expr: |
                 clamp_min(stddev_over_time((
                   (
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                   )
                 )[1h:]), 0.01)
               interval: "30s"
@@ -577,7 +577,7 @@ groups:
               expr: |
                 (
                   ( (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m]))
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m]))
                   ) >= 30 )
                 )
               interval: ""
@@ -624,39 +624,39 @@ groups:
                 (
                   (
                     (
-                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                       /
-                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                     )
                     -
                     avg_over_time((
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                       )
                     )[1h:])
                   )
                   /
                   clamp_min(stddev_over_time((
                     (
-                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                       /
-                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                     )
                   )[1h:]), 0.01)
                 ) > 3
                 and on (name, appName)
                 (
                   (
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                     /
-                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])), 1)
                   ) > 0.05
                 )
                 and on (name, appName)
                 (
-                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 30
+                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[5m])) >= 30
                 )
               interval: "30s"
               intervalMs: 1000
@@ -708,9 +708,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$", smsType="0"}[1m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -730,9 +730,9 @@ groups:
               expr: |
                 avg_over_time((
                   (
-                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                    sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                    clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                   )
                 )[10m:])
               interval: ""
@@ -751,7 +751,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m]))
+                sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -801,15 +801,15 @@ groups:
                 (
                   avg_over_time((
                     (
-                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))
+                      sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$", smsType="0"}[1m]))
                       /
-                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m])), 1)
+                      clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[1m])), 1)
                     )
                   )[10m:]) < 0.85
                 )
                 and on (name, appName)
                 (
-                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                  sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])) >= 100
                 )
               interval: ""
               intervalMs: 1000
@@ -888,9 +888,9 @@ groups:
                   (
                     (
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[30m]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[30m]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])), 1)
                       )
                       /
                       (1 - 0.98)
@@ -898,7 +898,7 @@ groups:
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])) >= 100
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])) >= 100
                   )
                 )
               intervalMs: 1000
@@ -919,9 +919,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[30m]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[30m]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[30m])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[30m])), 1)
                 )
               interval: "5s"
               intervalMs: 1000
@@ -1030,9 +1030,9 @@ groups:
                   (
                     (
                       (
-                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[2h]))
+                        sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[2h]))
                         /
-                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])), 1)
+                        clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[2h])), 1)
                       )
                       /
                       (1 - 0.98)
@@ -1040,7 +1040,7 @@ groups:
                   )
                   and on (name, appName)
                   (
-                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])) >= 100
+                    sum by(name, appName)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[2h])) >= 100
                   )
                 )
               interval: "30s"
@@ -1061,9 +1061,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[2h]))
+                  sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[2h]))
                   /
-                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[2h])), 1)
+                  clamp_min(sum by(name, appName)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", smsType="0"}[2h])), 1)
                 )
               interval: "30s"
               intervalMs: 1000
@@ -1169,9 +1169,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[5m])), 1)
                 )
               interval: "10s"
               intervalMs: 1000
@@ -1190,9 +1190,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[1m])), 1)
                 )
               interval: "10s"
               intervalMs: 1000
@@ -1212,9 +1212,9 @@ groups:
               expr: |
                 avg_over_time((
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[1m])), 1)
                   )
                 )[1h:])
               interval: "10s"
@@ -1235,9 +1235,9 @@ groups:
               expr: |
                 clamp_min(stddev_over_time((
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[1m])), 1)
                   )
                 )[1h:]), 0.01)
               interval: "10s"
@@ -1316,7 +1316,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m]))
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[5m]))
               interval: "10s"
               intervalMs: 1000
               maxDataPoints: 43200
@@ -1336,39 +1336,39 @@ groups:
                 (
                   (
                     (
-                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                       /
-                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[5m])), 1)
                     )
                     -
                     avg_over_time((
                       (
-                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                         /
-                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[1m])), 1)
                       )
                     )[1h:])
                   )
                   /
                   clamp_min(stddev_over_time((
                     (
-                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                       /
-                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[1m])), 1)
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[1m])), 1)
                     )
                   )[1h:]), 0.01)
                 ) > 3
                 and on (name, appName, countryId)
                 (
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[5m])), 1)
                   ) > 0.05
                 )
                 and on (name, appName, countryId)
                 (
-                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*"}[5m])) >= 30
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~".*", smsType="0"}[5m])) >= 30
                 )
               interval: "10s"
               intervalMs: 1000
@@ -1446,9 +1446,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[5m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -1467,9 +1467,9 @@ groups:
               editorMode: code
               expr: |
                 (
-                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                  sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                   /
-                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                  clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[1m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -1489,9 +1489,9 @@ groups:
               expr: |
                 avg_over_time((
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[1m])), 1)
                   )
                 )[2h:])
               interval: ""
@@ -1512,9 +1512,9 @@ groups:
               expr: |
                 clamp_min(stddev_over_time((
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[1m])), 1)
                   )
                 )[2h:]), 0.01)
               interval: ""
@@ -1593,7 +1593,7 @@ groups:
                 uid: prometheus
               editorMode: code
               expr: |
-                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m]))
+                sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[5m]))
               interval: ""
               intervalMs: 1000
               maxDataPoints: 43200
@@ -1613,39 +1613,39 @@ groups:
                 (
                   (
                     (
-                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                       /
-                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[5m])), 1)
                     )
                     -
                     avg_over_time((
                       (
-                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                        sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                         /
-                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                        clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[1m])), 1)
                       )
                     )[2h:])
                   )
                   /
                   clamp_min(stddev_over_time((
                     (
-                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[1m]))
+                      sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[1m]))
                       /
-                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[1m])), 1)
+                      clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[1m])), 1)
                     )
                   )[2h:]), 0.01)
                 ) > 4
                 and on (name, appName, countryId)
                 (
                   (
-                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", stat!~"^(DELIVRD|ACCEPTD)$", smsType="0"}[5m]))
                     /
-                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])), 1)
+                    clamp_min(sum by(name, appName, countryId)(rate(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[5m])), 1)
                   ) > 0.05
                 )
                 and on (name, appName, countryId)
                 (
-                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$"}[5m])) >= 30
+                  sum by(name, appName, countryId)(increase(supplier_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", countryId=~"^$", smsType="0"}[5m])) >= 30
                 )
               interval: ""
               intervalMs: 1000

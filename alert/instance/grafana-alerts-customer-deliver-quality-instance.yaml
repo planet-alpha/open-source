@@ -32,14 +32,14 @@ groups:
                 # 分组按 (name, appName, cId, appId)
                 (
                   100 * (
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^(DELIVRD|ACCEPTD)$"}[5m]))
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat=~"^(DELIVRD|ACCEPTD)$"}[5m]))
                     /
-                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
                   )
                 )
                 and (
                   # 基线去噪：总量 >= 100（total 包含所有状态，不排除超时）
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])) >= 100
                 )
               interval: ""
               intervalMs: 1000
@@ -48,6 +48,26 @@ groups:
               instant: true
               range: false
               refId: A
+          - refId: R
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: |
+                sum by(name, appName,cId,appId)(
+                  increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
+                )
+              interval: ""
+              intervalMs: 1000
+              instant: true
+              range: false
+              legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 回执总量(5m)"
+              maxDataPoints: 43200
           - refId: C
             relativeTimeRange:
               from: 600
@@ -56,7 +76,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [70]
+                    params: [99]
                     type: lt
                   operator:
                     type: and
@@ -77,10 +97,11 @@ groups:
         execErrState: Error
         for: 5m
         annotations:
-          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 成功比例 ≤ 70%"
+          summary: "客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }} 成功比例 ≤ 99%"
           description: |
             当前成功比例：{{ printf "%.2f" $values.A.Value }}%（窗口 5m，基线总量阈值：100，总量包含超时）。
             指标计算：成功率(%) = 100 × success(DELIVRD|ACCEPTD) / total(包含所有状态)
+            当前5分钟回执总量：{{ printf "%.0f" $values.R.Value }}
         labels:
           severity: warning
           category: business-deliver-quality
@@ -108,46 +129,46 @@ groups:
                   (
                     # R_base: 30m基线回执比例(%)
                     100 * avg_over_time((
-                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                       /
-                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                     )[30m:1m])
                     
                     -
                     
                     # R_cur: 当前1m回执比例(%)
                     100 * (
-                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                      sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                       /
-                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                      clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                     )
                   )
                   /
                   # 除以基线比例，得到相对下降比例
                   100 * avg_over_time((
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                     /
-                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                   )[30m:1m])
                   * 100, 0
                 )
                 and (
                   # 绝对下降门槛：30m内1m回执数均值 - 当前1m回执数 >= MIN_ABS_DROP
-                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))[30m:1m])
+                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))[30m:1m])
                   -
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                   >= 10
                 )
                 and (
                   # 总量基线门槛：30m内1m非超时总量的均值 >= MIN_BASELINE_TOTAL
-                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))[30m:1m]) >= 100
+                  avg_over_time(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m]))[30m:1m]) >= 100
                 )
                 and (
                   # 基线回执比例必须大于0，避免除零错误
                   100 * avg_over_time((
-                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                    sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                     /
-                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                    clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                   )[30m:1m]) > 0
                 )
               interval: ""
@@ -171,9 +192,9 @@ groups:
               editorMode: code
               expr: |
                 100 * (
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                   /
-                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                 )
               interval: ""
               intervalMs: 1000
@@ -196,9 +217,9 @@ groups:
               editorMode: code
               expr: |
                 100 * avg_over_time((
-                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
+                  sum by(name, appName,cId,appId)(increase(customer_deliver_resp_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[1m]))
                   /
-                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
+                  clamp_min(sum by(name, appName,cId,appId)(increase(customer_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^timeout$"}[1m])), 1)
                 )[30m:1m])
               interval: ""
               intervalMs: 1000

@@ -198,6 +198,7 @@ G --> H[验证恢复: 指标回落]
 ## 🚨 p99 交付时延较高
 - 标题: CustomerDeliverLatencyP99High  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_p99_high`
+- 告警含义: 最近5分钟里，最慢的那部分请求用时超过15秒，并且至少持续了5分钟，说明尾部请求明显变慢。
 
 **关键指标说明**
 
@@ -232,6 +233,7 @@ E --> F[观察回落]
 ## ⚠️ p99 交付时延预警
 - 标题: CustomerDeliverLatencyP99Warning  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_p99_warning`
+- 告警含义: 最近5分钟里，最慢的那部分请求用时超过10秒，并且持续了10分钟，提示尾部耗时开始抬头。
 
 **关键指标说明**
 
@@ -260,6 +262,7 @@ D --> E[观察趋势]
 ## 🚨 p95 交付时延较高
 - 标题: CustomerDeliverLatencyP95High  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_p95_high`
+- 告警含义: 最近5分钟里，多数请求完成时间超过8秒，并且至少持续了5分钟，说明整体变慢比较明显。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -286,6 +289,7 @@ D --> E[验证回落]
 ## ⚠️ p95 交付时延预警
 - 标题: CustomerDeliverLatencyP95Warning  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_p95_warning`
+- 告警含义: 最近5分钟里，多数请求完成时间超过6.5秒，并且持续了10分钟，是多数请求变慢的早期信号。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -312,6 +316,7 @@ D --> E[观察10m趋势]
 ## 🚨 平均交付时延较高
 - 标题: CustomerDeliverLatencyAvgHigh  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_avg_high`
+- 告警含义: 最近5分钟里，平均耗时超过8.5秒，且至少持续了5分钟，表示整体交付链路在变慢。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -338,6 +343,7 @@ D --> E[验证回落]
 ## ⚠️ 平均交付时延预警
 - 标题: CustomerDeliverLatencyAvgWarning  
 - 来源: `grafana-alerts-customer-deliver-latency-instance.yaml` / uid: `deliver_latency_avg_warning`
+- 告警含义: 最近5分钟里，平均耗时超过7.5秒，并持续10分钟，是整体变慢的早期提示。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -365,6 +371,7 @@ D --> E[确认10m内是否回落]
 - 标题: CustomerDeliverSuccessRateLow  
 - 来源: `grafana-alerts-customer-deliver-quality-instance.yaml` / uid: `deliver_fail_rate_high`
 - 含义: 5 分钟窗口内成功率（DELIVRD/ACCEPTD）≤ 70%，且总量≥100。
+- 告警含义: 最近5分钟里，成功率降到约70%或更低，并至少持续5分钟，说明交付质量出现明显下滑。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -397,6 +404,7 @@ F --> G[验证恢复]
 - 标题: CustomerReceiptDropRate  
 - 来源: `grafana-alerts-customer-deliver-quality-instance.yaml` / uid: `customer_receipt_drop_rate`
 - 含义: 现在 1 分钟里“收到回信”的比例，比过去 30 分钟的平均水平掉了 5% 以上，而且数量门槛也满足。
+- 告警含义: 现在1分钟收到回执的比例，比过去30分钟的平均水平明显下降（至少5%），并满足数量门槛，说明回执质量短期走低。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -429,6 +437,7 @@ G --> H[验证回升]
 ## ⚠️ p95 请求耗时过高
 - 标题: CustomerLatencyP95High  
 - 来源: `grafana-alerts-customer-latency-instance.yaml` / uid: `customer_latency_p95_high`
+- 告警含义: 最近5分钟里，多数请求用时超过500毫秒，并持续了5分钟，提示端到端处理开始变慢。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -458,6 +467,7 @@ D --> E[验证回落]
 ## 🛑 p99 请求耗时严重升高
 - 标题: CustomerLatencyP99High  
 - 来源: `grafana-alerts-customer-latency-instance.yaml` / uid: `customer_latency_p99_high`
+- 告警含义: 最近5分钟里，最慢的那部分请求用时超过1秒，并持续5分钟，说明尾部延迟显著升高，影响体验。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -488,6 +498,7 @@ E --> F[观察回落]
 ## ⚠️ 平均请求耗时过高
 - 标题: CustomerLatencyAvgHigh  
 - 来源: `grafana-alerts-customer-latency-instance.yaml` / uid: `customer_latency_avg_high`
+- 告警含义: 最近10分钟里，平均用时超过300毫秒，提示整体处理速度在下降。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -517,6 +528,7 @@ D --> E[验证回落]
 ## ⚠️ 上行成功率偏低
 - 标题: MOSuccessRateLow  
 - 来源: `grafana-alerts-customer-mo-quality-instance.yaml` / uid: `mo_success_rate_low`
+- 告警含义: 最近5分钟里，上行成功率降到约95%或更低，并持续5分钟，且有一定数据量，说明上行质量在下滑。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -546,6 +558,7 @@ F --> G[验证恢复]
 ## ⚠️ 请求-响应差值偏高
 - 标题: MOReqRespGapHigh  
 - 来源: `grafana-alerts-customer-mo-quality-instance.yaml` / uid: `mo_req_resp_gap_high`
+- 告警含义: 最近5分钟里，请求数和响应数的差距比例达到或超过10%，并持续5分钟，说明响应有积压或丢失。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -573,6 +586,7 @@ E --> F[验证回升]
 ## ⚠️ 上行错误率偏高
 - 标题: MOErrorRateHigh  
 - 来源: `grafana-alerts-customer-mo-quality-instance.yaml` / uid: `mo_error_rate_high`
+- 告警含义: 最近5分钟里，错误占比达到或超过5%，并持续5分钟，说明失败在增加。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -600,6 +614,7 @@ E --> F[验证回落]
 ## ⚠️ 上行 TPS 激增
 - 标题: MOTpsSurge  
 - 来源: `grafana-alerts-customer-mo-quality-instance.yaml` / uid: `mo_tps_surge`
+- 告警含义: 这几分钟的请求速度（TPS）比过去1小时的常态提升到3倍以上，并且短时间内一直保持高位，说明短时流量猛增。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -627,6 +642,7 @@ E --> F[观察短窗与长窗对比]
 ## ℹ️ 提交失败率信息级
 - 标题: CustomerSubmitFailureRateInfoShort  
 - 来源: `grafana-alerts-customer-submit-failure-instance.yaml` / uid: `customer_submit_failure_rate_info_short`
+- 告警含义: 最近5分钟的提交失败占比超过约2%，数据量也不小，是一个提醒关注的轻度异常。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度标签 |
 |---|---|---|---|---|---|
@@ -770,6 +786,7 @@ D --> E[观察2-3m是否回落]
 ## ⚠️ 客户侧TPS按客户+应用组合分组激增30%
 - 标题: 客户侧TPS按客户+应用组合分组激增30%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 某个客户+应用组合的1分钟流量，比过去30分钟的平均水平至少多出30%，并持续了几分钟，说明该组合突然冲高。
 - 含义: 某客户+应用分组 1m 相对 30m 均值激增 ≥ 30%，持续 3m，基线 ≥ 20。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
@@ -796,6 +813,7 @@ D --> E[观察回落]
 ## 🚨 客户侧TPS按客户+应用组合分组激增50%
 - 标题: 客户侧TPS按客户+应用组合分组激增50%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 某客户+应用组合的短时流量较常态多出一半以上，并持续了几分钟，属于明显激增。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -808,6 +826,7 @@ D --> E[观察回落]
 ## 🛑 客户侧TPS按客户+应用组合分组激增70%
 - 标题: 客户侧TPS按客户+应用组合分组激增70%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 某客户+应用组合的流量较常态多出七成以上，并持续几分钟，属于极端峰值。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -820,6 +839,7 @@ D --> E[观察回落]
 ## ⚠️ 客户侧TPS按客户应用名称短时窗口激增
 - 标题: 客户侧TPS按客户应用名称短时窗口激增
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 某客户应用在很短时间里突然比最近几分钟的平均水平多出一大截（绝对值与比例都达标），提示瞬时冲击。
 - 含义: 1m 对 3m 均值的绝对 TPS 激增（分组维度），满足短窗门槛。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 其他门槛 | 维度 |
@@ -833,6 +853,7 @@ D --> E[观察回落]
 ## ⚠️ 客户侧TPS按客户+应用+通道三维分组激增30%
 - 标题: 客户侧TPS按客户+应用+通道三维分组激增30%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 某客户+应用+通道组合的1分钟流量较30分钟常态提升三成以上，并持续几分钟，提示该组合成为热点。
 - 含义: 某三维分组 1m 相对 30m 均值激增 ≥ 30%，持续 3m，基线 ≥ 10。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
@@ -846,6 +867,7 @@ D --> E[观察回落]
 ## 🚨 客户侧TPS按客户+应用+通道三维分组激增50%
 - 标题: 客户侧TPS按客户+应用+通道三维分组激增50%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 该三维组合的短时流量较常态提升一半以上，并持续几分钟，属于明显激增。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -858,6 +880,7 @@ D --> E[观察回落]
 ## 🛑 客户侧TPS按客户+应用+通道三维分组激增70%
 - 标题: 客户侧TPS按客户+应用+通道三维分组激增70%
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 该三维组合的短时流量较常态提升七成以上，并持续几分钟，是极端峰值。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -870,6 +893,7 @@ D --> E[观察回落]
 ## ⚠️ 客户侧TPS按客户+应用+通道三维短时窗口激增
 - 标题: 客户侧TPS按客户+应用+通道三维短时窗口激增
 - 来源: `grafana-alerts-customer-tps-surge-instance.yaml`
+- 告警含义: 该三维组合在很短时间里突然比最近几分钟的平均水平多出明显一段（绝对值与比例都达标），提示瞬时冲击。
 - 含义: 1m 对 3m 均值的绝对 TPS 激增（≥50 TPS），且 > 1.3×3m均值，持续 2m。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 其他门槛 | 维度 |
@@ -887,6 +911,7 @@ D --> E[观察回落]
 ## ⚠️ 供应商应用连接下降未恢复
 - 标题: SupplierAppConnectionsDropAlert  
 - 来源: `grafana-alerts-supplier-conn-drop-instance.yaml` / uid: `supplier_app_conn_drop_alert`
+- 告警含义: 近几分钟里，实际连接数和“正常应有的连接数”对不上，并且持续了一段时间没有恢复，说明供应商侧连接掉线还没修好。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度 |
 |---|---|---|---|---|---|
@@ -918,6 +943,7 @@ E --> F[验证恢复]
 ## ℹ️ 供应商连接恢复通知
 - 标题: SupplierAppConnectionsRecoveredAlert  
 - 来源: `grafana-alerts-supplier-conn-drop-instance.yaml` / uid: `supplier_app_conn_recovered`
+- 告警含义: 之前连接数不正常，现在已经恢复成正常水平，并持续一段时间，说明连接回来了。
 
 | 指标名称 | 含义 | 窗口 | 阈值 |
 |---|---|---|---|
@@ -930,6 +956,7 @@ E --> F[验证恢复]
 ## ⚠️ 回执比例过低
 - 标题: SupplierDeliverReceiptRateLow  
 - 来源: `grafana-alerts-supplier-deliver-instance.yaml` / uid: `sdr_rate_low`
+- 告警含义: 最近一段时间里，收到回执的比例明显低于正常值，并且不是偶发，说明回执质量在下降。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 |
 |---|---|---|---|---|
@@ -956,6 +983,7 @@ E --> F[验证恢复]
 ## ⚠️ 超时比例过高
 - 标题: SupplierDeliverTimeoutRateHigh  
 - 来源: 同上 / uid: `sdt_rate_high`
+- 告警含义: 最近的超时占比明显高于正常值，并且持续一段时间，说明链路或通道响应变慢甚至卡住。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 |
 |---|---|---|---|---|
@@ -981,6 +1009,7 @@ D --> E[验证]
 ## ⚠️ 失败率短时激增
 - 标题: SupplierDeliverFailureRateSurge  
 - 来源: 同上 / uid: `sd_failure_rate_surge`
+- 告警含义: 短时间里失败占比突然翻倍到异常水平，并且不是个别样本，说明出错在集中增加。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 其他 |
 |---|---|---|---|---|
@@ -1007,6 +1036,7 @@ E --> F[验证回落]
 ## ⚠️ 国家维度失败率过高
 - 标题: SupplierDeliverFailureRateByCountry  
 - 来源: 同上 / uid: `sd_failure_rate_by_country`
+- 告警含义: 某个国家的失败占比在最近一段时间里明显超标，且样本充足，说明该国家的质量出现问题。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 |
 |---|---|---|---|---|
@@ -1034,6 +1064,7 @@ F --> G[验证回落]
 ## ⚠️ 国家维度回执比例过低
 - 标题: SupplierDeliverReceiptRateLowByCountry  
 - 来源: 同上 / uid: `sd_receipt_r_low_by_country`
+- 告警含义: 某个国家的回执比例在最近一段时间里明显低于应有水平，说明该国家的回执质量下降。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 |
 |---|---|---|---|---|
@@ -1061,6 +1092,7 @@ F --> G[验证回升]
 ## ⚠️ 国家维度超时比例过高
 - 标题: SupplierDeliverTimeoutRateHighByCountry  
 - 来源: 同上 / uid: `sdt_rate_high_by_country`
+- 告警含义: 某个国家的超时占比在最近一段时间里明显超标，说明该国家的链路更容易超时。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 |
 |---|---|---|---|---|
@@ -1086,6 +1118,7 @@ D --> E[验证回落]
 ## ⚠️ 成功率SLO快速燃尽
 - 标题: SupplierDeliverSLOBurnFast  
 - 来源: `grafana-alerts-supplier-deliver-robust-instance.yaml` / uid: `sdr_slo_burn_fast`
+- 告警含义: 用“目标成功率”来衡量误差预算时，短窗和长窗都快速超出可承受范围，说明质量下滑很快。
 
 **关键指标说明**
 
@@ -1101,6 +1134,7 @@ D --> E[验证回落]
 ## ⚠️ 超时SLO快速燃尽
 - 标题: SupplierDeliverTimeoutSLOBurnFast  
 - 来源: 同上 / uid: `sdt_slo_burn_fast`
+- 告警含义: 对“允许的超时预算”来说，短窗和长窗都快速超出范围，说明超时问题在快速恶化。
 
 **关键指标说明**
 
@@ -1116,6 +1150,7 @@ D --> E[验证回落]
 ## ⚠️ 失败率Z分数异常
 - 标题: SupplierDeliverFailureZScoreAnomaly  
 - 来源: 同上 / uid: `sd_failure_z_anomaly`
+- 告警含义: 最近5分钟的失败情况跟过去1小时的常态差距很大（统计意义上显著），属于明显异常。
 
 **关键指标说明**
 
@@ -1131,6 +1166,7 @@ D --> E[验证回落]
 ## ⚠️ 平滑回执比例过低
 - 标题: SupplierDeliverReceiptRateLowSmooth  
 - 来源: 同上 / uid: `sdr_receipt_rate_low_smooth`
+- 告警含义: 即便用10分钟的平滑方式看，回执比例仍明显低于目标，说明问题不是短时波动。
 
 **关键指标说明**
 
@@ -1145,6 +1181,7 @@ D --> E[验证回落]
 ## ⚠️ 成功率SLO慢速燃尽-30m
 - 标题: SupplierDeliverSLOBurnSlow30m  
 - 来源: 同上 / uid: `sdr_slo_burn_slow_30m`
+- 告警含义: 用30分钟的视角看，错误预算在缓慢但持续地被“用完”，说明质量在走弱。
 
 **关键指标说明**
 
@@ -1159,6 +1196,7 @@ D --> E[验证回落]
 ## ⚠️ 成功率SLO慢速燃尽-6h
 - 标题: SupplierDeliverSLOBurnSlow6h  
 - 来源: 同上 / uid: `sdr_slo_burn_slow_6h`
+- 告警含义: 用更长时间窗看（2小时评估），错误预算在慢慢耗尽，说明更结构性的质量问题。
 
 **关键指标说明**
 
@@ -1173,6 +1211,7 @@ D --> E[验证回落]
 ## ⚠️ 国家维度失败率Z异常（默认/高波动）
 - 标题: FailureZScoreByCountryDefault/HighVariance  
 - 来源: 同上 / uid: `sd_failure_z_anomaly_by_country_default` / `sd_failure_z_anomaly_by_country_highvar`
+- 告警含义: 某些国家最近的失败情况与其历史常态差距很大（高波动国家门槛更严格），需要优先关注。
 
 **关键指标说明**
 
@@ -1187,6 +1226,7 @@ D --> E[验证回落]
 ## ⚠️ p95 供应商延迟过高
 - 标题: SupplierLatencyP95High  
 - 来源: `grafana-alerts-supplier-latency-instance.yaml` / uid: `supplier_latency_p95_high`
+- 告警含义: 最近5分钟里，供应商端多数请求的用时超过常态，说明整体处理变慢。
 
 **关键指标说明**
 
@@ -1219,6 +1259,7 @@ D --> E[验证回落]
 ## 🛑 p99 供应商延迟严重升高
 - 标题: SupplierLatencyP99High  
 - 来源: 同上 / uid: `supplier_latency_p99_high`
+- 告警含义: 最近5分钟里，供应商端最慢的那部分请求用时显著抬高，说明尾部延迟非常严重。
 
 **关键指标说明**
 
@@ -1251,6 +1292,7 @@ D --> E[验证回落]
 ## ⚠️ 平均供应商延迟过高
 - 标题: SupplierLatencyAvgHigh  
 - 来源: 同上 / uid: `supplier_latency_avg_high`
+- 告警含义: 最近10分钟里，供应商端平均用时超出正常水平，表示整体变慢。
 
 **关键指标说明**
 
@@ -1373,6 +1415,7 @@ E --> F[持续监控, 记录处置与恢复]
 ## ⚠️ 供应商提交响应回执下降率
 - 标题: SupplierReceiptDropRate  
 - 来源: `grafana-alerts-supplier-submitResp-drop-instance.yaml` / uid: `supplier_receipt_drop_rate`
+- 告警含义: 最近1分钟收到的提交响应回执比例，比过去30分钟的常态明显降低，并满足数量门槛，说明回执在减少。
 
 | 指标 | 含义 | 窗口 | 阈值 | 双门槛 |
 |---|---|---|---|---|
@@ -1439,6 +1482,7 @@ E --> F[观察3m是否回落]
 ## 🚨 供应商侧TPS总量激增50%(High)
 - 标题: 供应商侧TPS总量激增50%(High)
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 1分钟的流量较30分钟常态一下子多出一半以上，并且持续几分钟，供应商侧出现明显峰值。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度 |
 |---|---|---|---|---|---|
@@ -1469,6 +1513,7 @@ D --> E[记录并观察回落]
 ## 🛑 供应商侧TPS总量激增70%(Critical)
 - 标题: 供应商侧TPS总量激增70%(Critical)
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 1分钟的流量较常态多出七成以上，并持续几分钟，是极端峰值，需要立刻应对。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线/门槛 | 维度 |
 |---|---|---|---|---|---|
@@ -1527,6 +1572,7 @@ D --> E[观察2-3m是否回落]
 ## ⚠️ 供应商侧TPS按供应商+应用组合分组激增30%
 - 标题: 供应商侧TPS按供应商+应用组合分组激增30%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 某个供应商+应用组合的短时流量较常态提升三成以上，并持续几分钟，说明该组合成为热点。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1555,6 +1601,7 @@ D --> E[观察回落]
 ## 🚨 供应商侧TPS按供应商+应用组合分组激增50%
 - 标题: 供应商侧TPS按供应商+应用组合分组激增50%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 该分组的短时流量较常态提升一半以上，并持续几分钟，属于明显激增。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1582,6 +1629,7 @@ C --> D[观察回落并记录]
 ## 🛑 供应商侧TPS按供应商+应用组合分组激增70%
 - 标题: 供应商侧TPS按供应商+应用组合分组激增70%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 该分组的短时流量较常态提升七成以上，并持续几分钟，是极端峰值。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1610,6 +1658,7 @@ D --> E[记录并持续监控]
 ## ⚠️ 供应商侧TPS按供应商应用名称短时窗口激增
 - 标题: 供应商侧TPS按供应商应用名称短时窗口激增
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 某供应商应用在很短时间里突然比最近几分钟的平均水平多出一大截（绝对值与比例都达标），提示瞬时冲击。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 其他门槛 | 维度 |
 |---|---|---|---|---|---|
@@ -1639,6 +1688,7 @@ D --> E[观察2-3m回落]
 ## ⚠️ 供应商侧TPS按供应商+应用+通道三维分组激增30%
 - 标题: 供应商侧TPS按供应商+应用+通道三维分组激增30%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 某供应商+应用+通道组合的短时流量较常态提升三成以上，并持续几分钟，提示该组合成为热点。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1667,6 +1717,7 @@ D --> E[观察回落]
 ## 🚨 供应商侧TPS按供应商+应用+通道三维分组激增50%
 - 标题: 供应商侧TPS按供应商+应用+通道三维分组激增50%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 该三维组合的短时流量较常态提升一半以上，并持续几分钟，属于明显激增。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1694,6 +1745,7 @@ C --> D[观察并记录]
 ## 🛑 供应商侧TPS按供应商+应用+通道三维分组激增70%
 - 标题: 供应商侧TPS按供应商+应用+通道三维分组激增70%
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 该三维组合的短时流量较常态提升七成以上，并持续几分钟，是极端峰值。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 基线 | 维度 |
 |---|---|---|---|---|---|
@@ -1722,6 +1774,7 @@ D --> E[记录处置并监控]
 ## ⚠️ 供应商侧TPS按供应商+应用+通道三维短时窗口激增
 - 标题: 供应商侧TPS按供应商+应用+通道三维短时窗口激增
 - 来源: `grafana-alerts-supplier-tps-surge-instance.yaml`
+- 告警含义: 该三维组合在很短时间里突然比最近几分钟的平均水平多出明显一段（绝对值与比例都达标），提示瞬时冲击。
 
 | 指标名称 | 含义 | 窗口 | 阈值 | 其他门槛 | 维度 |
 |---|---|---|---|---|---|

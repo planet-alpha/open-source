@@ -731,7 +731,7 @@ groups:
                   / avg_over_time(sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName,cId,appId, connectId) (avg_over_time(sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 8)
+                and on(name, appName,cId,appId, connectId) (avg_over_time(sum by(name, appName,cId,appId, connectId)(rate(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 50)
               interval: ""
               intervalMs: 1000
               legendFormat: "客户名称:{{name}} 客户id :{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} 通道{{connectId}} 激增比例(%)"
@@ -781,7 +781,7 @@ groups:
         for: 3m
         annotations:
           summary: "客户名称:{{$labels.name}} 客户id :{{$labels.cId}} 客户应用名称:{{$labels.appName}} 客户应用id:{{$labels.appId}} 通道{{$labels.connectId}} TPS激增≥50%"
-          description: "客户名称:{{$labels.name}} 客户id :{{$labels.cId}} 客户应用名称:{{$labels.appName}} 客户应用id:{{$labels.appId}} 通道{{$labels.connectId}} TPS相对30m基线激增≥50%，且基线≥8 TPS，持续3分钟"
+          description: "客户名称:{{$labels.name}} 客户id :{{$labels.cId}} 客户应用名称:{{$labels.appName}} 客户应用id:{{$labels.appId}} 通道{{$labels.connectId}} TPS相对30m基线激增≥50%，且基线≥50 TPS，持续3分钟"
         labels:
           severity: high
           category: business-tps-surge
