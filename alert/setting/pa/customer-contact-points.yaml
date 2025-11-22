@@ -1,0 +1,215 @@
+# Grafana Unified Alerting - Customer Contact Points
+# 使用说明：将本文件放入 Grafana provisioning/alerting 目录，重启/Reload Grafana 生效。
+# 目的：为客户侧各类告警创建独立 contact points（基于 supplier 配置结构与逻辑进行转换）
+# 覆盖范围：
+# 1) 客户应用连接数偏离 total 基线（business-app-connections）
+# 2) 交付质量（business-deliver-quality）
+# 3) 交付耗时（business-deliver-latency）
+# 4) 请求耗时（latency）
+# 5) 上行（MO）质量（business-mo-quality）
+# 6) 上行（MO）TPS（business-mo-tps）
+# 7) 客户侧回执下降（business-customer-receipt）
+# 8) 提交失败（submit）
+# 9) 登录失败激增（business-customer-login）
+# 10) 客户侧 TPS 激增（business-tps-surge）
+apiVersion: 1
+contactPoints:
+  # 1) 客户应用连接数偏离 total 基线
+  - orgId: 1
+    name: customer-conn-drop
+    receivers:
+      # - uid: customer-conn-drop-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_conn_drop@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Conn Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-conn-drop-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/3e8df85667e3a09dbbc471f944ea2a87"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 2) 交付质量
+  - orgId: 1
+    name: customer-deliver-quality
+    receivers:
+      # - uid: customer-deliver-quality-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_deliver_quality@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Delivery Quality] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-deliver-quality-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/40601ed90db12ac8d05bdf71f5f9affd"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 3) 交付耗时
+  - orgId: 1
+    name: customer-deliver-latency
+    receivers:
+      # - uid: customer-deliver-latency-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_deliver_latency@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Delivery Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-deliver-latency-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/8ab5b635a0166b7c3bae5a55b0de5bd4"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 4) 请求耗时（通用 latency）
+  - orgId: 1
+    name: customer-latency
+    receivers:
+      # - uid: customer-latency-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_latency@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Latency] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-latency-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/8ab5b635a0166b7c3bae5a55b0de5bd4"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 5) 上行（MO）质量
+  - orgId: 1
+    name: customer-mo-quality
+    receivers:
+      # - uid: customer-mo-quality-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_mo_quality@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer MO Quality] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-mo-quality-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/3e8df85667e3a09dbbc471f944ea2a87"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 6) 上行（MO）TPS
+  - orgId: 1
+    name: customer-mo-tps
+    receivers:
+      # - uid: customer-mo-tps-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_mo_tps@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer MO TPS] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-mo-tps-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/3db25d98ca89b34fa128be106d7c057d"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 7) 客户侧回执下降
+  - orgId: 1
+    name: customer-receipt-drop
+    receivers:
+      # - uid: customer-receipt-drop-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_receipt_drop@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Receipt Drop] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-receipt-drop-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/40601ed90db12ac8d05bdf71f5f9affd"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 8) 提交失败
+  - orgId: 1
+    name: customer-submit-failure
+    receivers:
+      # - uid: customer-submit-failure-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_submit_failure@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Submit Failure] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-submit-failure-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/40601ed90db12ac8d05bdf71f5f9affd"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 9) 登录失败激增
+  - orgId: 1
+    name: customer-login
+    receivers:
+      # - uid: customer-login-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_login@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer Login Failure Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-login-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/3e8df85667e3a09dbbc471f944ea2a87"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+
+  # 10) 客户侧 TPS 激增
+  - orgId: 1
+    name: customer-tps-surge
+    receivers:
+      # - uid: customer-tps-surge-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_tps_surge@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer TPS Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-tps-surge-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/3db25d98ca89b34fa128be106d7c057d"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'

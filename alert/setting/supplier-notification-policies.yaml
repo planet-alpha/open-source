@@ -99,7 +99,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - business-tps-surge
+              - business-supplier-tps-surge
           group_wait: 2m
           group_interval: 10m
           repeat_interval: 30m
@@ -267,6 +267,17 @@ policies:
           group_interval: 10m
           repeat_interval: 30m
           continue: true
-      group_wait: 30s
-      group_interval: 5m
-      repeat_interval: 4h
+        # 11) 客户侧 TPS 激增
+        - receiver: customer-loss
+          group_by:
+            - grafana_folder
+            - alertname
+            - name
+            - appName
+          object_matchers:
+            - - category
+              - =
+              - business-lost-limit
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 4h

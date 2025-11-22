@@ -129,7 +129,7 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/fc9f360370edfc7ead15058dc9d7aed1"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'
@@ -209,7 +209,26 @@ contactPoints:
         type: webhook
         disableResolveMessage: true
         settings:
-          url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/fc9f360370edfc7ead15058dc9d7aed1"
+          message: '{{ template "custom.alerts" . }}'
+          httpMethod: POST
+          maxAlerts: '0'
+  # 10) 客户侧 TPS 激增
+  - orgId: 1
+    name: customer-loss
+    receivers:
+      # - uid: customer-tps-surge-email
+      #   type: email
+      #   disableResolveMessage: true
+      #   settings:
+      #     addresses: "replace_me_customer_tps_surge@example.com"
+      #     singleEmail: true
+      #     subject: "[Grafana][Customer TPS Surge] {{ .CommonLabels.alertname }} - {{ .CommonLabels.severity }}"
+      - uid: customer-loss-feishu
+        type: webhook
+        disableResolveMessage: true
+        settings:
+          url: "https://www.feishu.cn/flow/api/trigger-webhook/1c26e8682bc2c130c844a777a8103d2c"
           message: '{{ template "custom.alerts" . }}'
           httpMethod: POST
           maxAlerts: '0'

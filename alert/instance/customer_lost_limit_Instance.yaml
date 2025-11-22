@@ -1,0 +1,193 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Customer Lost Limit Alerts
+    folder: Business-Customer-LostLimit
+    interval: 1m
+    rules:
+      - uid: lost_limit_changed_country
+        title: CustomerLostLimitChangedCountry
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              datasource: { type: prometheus, uid: prometheus }
+              editorMode: code
+              expr: |
+                max by(appId,appName,cId,name)(
+                  max_over_time(
+                    lost_limit{lossType="国家级别亏损"}[1m]
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户名称:{{name}} 客户id:{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} lossType:国家级别亏损"
+              instant: true
+              range: false
+              refId: A
+          - refId: B
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              reducer: last
+              type: reduce
+              refId: B
+          - refId: A_prev
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              datasource: { type: prometheus, uid: prometheus }
+              editorMode: code
+              expr: |
+                min by(appId,appName,cId,name)(
+                  min_over_time(
+                    lost_limit{ lossType="国家级别亏损"}[1m] offset 1m
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "上一分钟最小值 国家级别"
+              instant: true
+              range: false
+              refId: A_prev
+          - refId: B_prev
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A_prev
+              reducer: last
+              type: reduce
+              refId: B_prev
+          - refId: D
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: abs($B - $B_prev)
+              type: math
+              refId: D
+          - refId: C
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [0], type: gt }
+                  operator: { type: and }
+                  query: { params: [D] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: D
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "亏损上限（国家级别）：客户名称:{{ $labels.name }} 客户id:{{ $labels.cId }} 应用名称:{{ $labels.appName }} 应用id:{{ $labels.appId }}"
+          description: "最新亏损金额达到 ：{{ $values.B.Value | printf \"%.0f\" }}，上一分钟亏损金额达到 ：{{ $values.B_prev.Value | printf \"%.0f\" }}，亏损增加 ：{{ $values.D.Value | printf \"%.0f\" }}"
+        labels:
+          severity: info
+          priority: P0
+          category: business-lost-limit
+          alert_type: lost_limit
+
+      - uid: lost_limit_changed_operator
+        title: CustomerLostLimitChangedOperator
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              datasource: { type: prometheus, uid: prometheus }
+              editorMode: code
+              expr: |
+                max by(appId,appName,cId,name)(
+                  max_over_time(
+                    lost_limit{lossType="运营商级别亏损"}[1m]
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "客户名称:{{name}} 客户id:{{cId}} 客户应用名称:{{appName}} 客户应用id:{{appId}} lossType:运营商级别亏损"
+              instant: true
+              range: false
+              refId: A
+          - refId: B
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A
+              reducer: last
+              type: reduce
+              refId: B
+          - refId: A_prev
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              datasource: { type: prometheus, uid: prometheus }
+              editorMode: code
+              expr: |
+                min by(appId,appName,cId,name)(
+                  min_over_time(
+                    lost_limit{lossType="运营商级别亏损"}[1m] offset 1m
+                  )
+                )
+              interval: ""
+              intervalMs: 1000
+              legendFormat: "上一分钟最小值 运营商级别"
+              instant: true
+              range: false
+              refId: A_prev
+          - refId: B_prev
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: A_prev
+              reducer: last
+              type: reduce
+              refId: B_prev
+          - refId: D
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: abs($B - $B_prev)
+              type: math
+              refId: D
+          - refId: C
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator: { params: [0], type: gt }
+                  operator: { type: and }
+                  query: { params: [D] }
+                  reducer: { type: last }
+                  type: query
+              datasource: { type: __expr__, uid: __expr__ }
+              expression: D
+              intervalMs: 1000
+              refId: C
+              type: threshold
+        noDataState: OK
+        execErrState: Error
+        for: 0m
+        annotations:
+          summary: "亏损上限（运营商级别）：客户名称:{{ $labels.name }} 客户id:{{ $labels.cId }} 应用名称:{{ $labels.appName }} 应用id:{{ $labels.appId }}"
+          description: "最新亏损金额达到 ：{{ $values.B.Value | printf \"%.0f\" }}，上一分钟亏损金额达到 ：{{ $values.B_prev.Value | printf \"%.0f\" }}，亏损增加 ：{{ $values.D.Value | printf \"%.0f\" }}"
+        labels:
+          severity: info
+          priority: P0
+          category: business-lost-limit
+          alert_type: lost_limit
