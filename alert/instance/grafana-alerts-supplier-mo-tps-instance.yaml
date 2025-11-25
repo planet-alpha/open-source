@@ -17,13 +17,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier MO TPS Alerts
-    folder: Business-Supplier-MO-TPS
+    name: 供应商MO TPS告警
+    folder: 业务-供应商-MO-TPS
     interval: 1m
     rules:
       # ======================= 激增(WARNING) =======================
       - uid: supplier_mo_tps_surge_warning
-        title: SupplierMoTpsSurge(Warning)
+        title: 供应商MO TPS激增（警告）
         condition: D
         data:
           - refId: A
@@ -208,7 +208,7 @@ groups:
 
       # ======================= 激增(HIGH) =======================
       - uid: supplier_mo_tps_surge_high
-        title: SupplierMoTpsSurge(High)
+        title: 供应商MO TPS激增（高）
         condition: D
         data:
           - refId: A
@@ -393,7 +393,7 @@ groups:
 
       # ======================= 激增(CRITICAL) =======================
       - uid: supplier_mo_tps_surge_critical
-        title: SupplierMoTpsSurge(Critical)
+        title: 供应商MO TPS激增（严重）
         condition: D
         data:
           - refId: A

@@ -41,7 +41,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - Business-Delivery 
+              - supplier-deliver
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 10m
@@ -56,7 +56,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - business-supplier-latency
+              - supplier-latency
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 10m
@@ -130,7 +130,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - business-deliver-quality
+              - business-customer-receipt
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 10m
@@ -164,7 +164,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - latency
+              - customer-latency
           group_wait: 1m
           group_interval: 5m
           repeat_interval: 10m
@@ -230,7 +230,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - submit
+              - customer-submit-failure
           group_wait: 2m
           group_interval: 10m
           repeat_interval: 30m
@@ -246,7 +246,7 @@ policies:
           object_matchers:
             - - category
               - =
-              - business-customer-login
+              - business-app-connections
           group_wait: 2m
           group_interval: 10m
           repeat_interval: 30m
@@ -267,7 +267,7 @@ policies:
           group_interval: 10m
           repeat_interval: 30m
           continue: true
-        # 11) 客户侧 TPS 激增
+        # 11) 亏损上限
         - receiver: customer-loss
           group_by:
             - grafana_folder

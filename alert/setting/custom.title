@@ -1,0 +1,1 @@
+{{ define "custom.title" }}{{.GroupLabels.SortedPairs.Values | join " "}} {{ end }}

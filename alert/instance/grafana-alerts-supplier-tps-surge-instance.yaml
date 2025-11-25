@@ -15,8 +15,8 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier TPS Surge Alerts
-    folder: Business-Supplier-TPS-Surge
+    name: 供应商侧TPS激增告警
+    folder: 业务-供应商-TPS-激增
     interval: 1m
     rules:
       # ==================== 总量激增告警 ====================
@@ -605,7 +605,7 @@ groups:
                   / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 40)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
@@ -720,7 +720,7 @@ groups:
           description: |-
             提交给供应商{{ $labels.name }}应用{{ $labels.appName }}TPS激增≥30%
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥20 TPS，持续3分钟
+            条件: 基线≥40 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -746,7 +746,7 @@ groups:
                   / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 40)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
@@ -860,7 +860,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS激增≥50%"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥20 TPS，持续3分钟
+            条件: 基线≥40 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -886,7 +886,7 @@ groups:
                   / avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 20)
+                and on(name, appName) (avg_over_time(sum by(name, appName)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0"}[1m]))[30m:1m]) >= 40)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 激增比例(%)"
@@ -1000,7 +1000,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 提交给供应商的TPS激增≥70%"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥20 TPS，持续3分钟
+            条件: 基线≥40 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -1168,7 +1168,7 @@ groups:
                   / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 10)
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 40)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
@@ -1282,7 +1282,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥30%"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥10 TPS，持续3分钟
+            条件: 基线≥40 TPS，持续3分钟
         labels:
           severity: warning
           category: business-supplier-tps-surge
@@ -1308,7 +1308,7 @@ groups:
                   / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 40)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
@@ -1422,7 +1422,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥50%"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥8 TPS，持续3分钟
+            条件: 基线≥40 TPS，持续3分钟
         labels:
           severity: high
           category: business-supplier-tps-surge
@@ -1448,7 +1448,7 @@ groups:
                   / avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) 
                   - 1
                 ) * 100
-                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 8)
+                and on(name, appName, connectId) (avg_over_time(sum by(name, appName, connectId)(rate(supplier_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*", protocol=~".*", stat="0", connectId=~".*"}[1m]))[30m:1m]) >= 60)
               interval: ""
               intervalMs: 1000
               legendFormat: "供应商名称:{{name}} 供应商应用名称:{{appName}} 通道ID:{{connectId}} 激增比例(%)"
@@ -1562,7 +1562,7 @@ groups:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 通道ID:{{ $labels.connectId }} 提交给供应商的TPS激增≥70%"
           description: |-
             当前1mTPS: {{ $values.RR.Value | printf "%.2f" }} TPS，30m基线1mTPS: {{ $values.TT.Value | printf "%.2f" }} TPS
-            条件: 基线≥8 TPS，持续3分钟
+            条件: 基线≥60 TPS，持续3分钟
         labels:
           severity: high
           category: business-supplier-tps-surge

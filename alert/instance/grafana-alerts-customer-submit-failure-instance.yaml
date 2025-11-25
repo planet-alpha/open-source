@@ -5,13 +5,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Customer Submit Failure Alerts
-    folder: Business-Latency
+    name: 客户侧提交失败告警
+    folder: 业务-客户-延迟
     interval: 1m
     rules:
       # 失败率（信息级）- 短窗口 5 分钟用于快速捕捉异常升高，带短窗基线
       - uid: customer_submit_failure_rate_info_short
-        title: CustomerSubmitFailureRateInfoShort
+        title: 客户侧提交失败率信息异常（短窗口）
         condition: C
         data:
           - refId: A
@@ -34,7 +34,7 @@ groups:
                     sum by(name, appName,cId,appId)(
                       increase(customer_submit_total{cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])
                     )
-                  ) > 0.02
+                  ) > 0.20
                 )
                 and
                 (
@@ -94,9 +94,9 @@ groups:
         annotations:
           summary: "客户提交失败率在5分钟窗口内上升 (客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }})"
           description: |
-            基于过去 5 分钟数据，检测到提交失败率超过 2%（且 5 分钟提交总量 ≥ 50）。
+            基于过去 5 分钟数据，检测到提交失败率超过 20%（且 5 分钟提交总量 ≥ 50）。
             该级别用于快速提示短时异常，便于及时关注。
         labels:
           severity: info
-          category: submit
+          category: customer-submit-failure
           alert_type: submit_failure_rate_info_5m

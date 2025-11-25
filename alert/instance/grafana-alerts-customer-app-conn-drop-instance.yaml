@@ -18,12 +18,12 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Customer App Connection Alerts
-    folder: Business-Customer-App-Connections
+    name: 客户应用连接告警
+    folder: 业务-客户-应用连接
     interval: 1m
     rules:
       - uid: app_conn_drop_not_recovered_1m
-        title: CustomerAppConnectionsDrop5mPattern
+        title: 客户应用连接在5分钟内下降
         condition: C
         data:
           - refId: A
@@ -168,7 +168,7 @@ groups:
           alert_type: connection_drop
 
       - uid: app_conn_recover_notice_1m
-        title: CustomerAppConnectionsRecover5mPattern
+        title: 客户应用连接在5分钟内恢复
         condition: C
         data:
           - refId: A
@@ -311,7 +311,7 @@ groups:
           alert_type: connection_recovered
 
       - uid: customer_login_failure_count_high_1m
-        title: CustomerLoginFailureCountHigh1m
+        title: 客户登录失败次数1分钟内偏高
         condition: C
         data:
           - refId: A
@@ -365,5 +365,5 @@ groups:
             客户登录失败的数值检测：每分钟失败次数超过5次，并持续3分钟后触发告警
         labels:
           severity: warning
-          category: business-customer-login
+          category: business-app-connections
           alert_type: failure_count_high

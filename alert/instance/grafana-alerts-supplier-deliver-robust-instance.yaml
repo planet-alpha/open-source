@@ -16,12 +16,12 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier Deliver Alerts (Robust)
-    folder: Business-Delivery
+    name: 供应商投递告警（稳健版）
+    folder: 业务-供应商-投递
     interval: 1m
     rules:
       - uid: sdr_slo_burn_fast
-        title: SupplierDeliverSLOBurnFast
+        title: 供应商投递SLO消耗过快
         condition: D
         data:
           - refId: A
@@ -214,11 +214,11 @@ groups:
             【燃尽】5m={{ $values.BR5_L.Value | printf "%.2f" }}，1h={{ $values.BR60_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: slo_burn_fast
 
       - uid: sdt_slo_burn_fast
-        title: SupplierDeliverTimeoutSLOBurnFast
+        title: 供应商投递超时SLO消耗过快
         condition: D
         data:
           - refId: A
@@ -409,11 +409,11 @@ groups:
             【燃尽】5m={{ $values.BR5_L.Value | printf "%.2f" }}，1h={{ $values.BR60_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: timeout_slo_burn_fast
 
       - uid: sd_failure_z_anomaly
-        title: SupplierDeliverFailureZScoreAnomaly
+        title: 供应商投递失败Z分数异常
         condition: D
         data:
           - refId: ER5
@@ -689,11 +689,11 @@ groups:
             【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【1h均值】={{ $values.AVG1H_L.Value | printf "%.4f" }}，【1h标准差】={{ $values.STD1H_L.Value | printf "%.4f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: failure_z_anomaly
 
       - uid: sdr_receipt_rate_low_smooth
-        title: SupplierDeliverReceiptRateLowSmooth
+        title: 供应商回执率低（平滑）
         condition: D
         data:
           - refId: R1M
@@ -866,11 +866,11 @@ groups:
             【当前10m回执比例】={{ $values.R10M_L.Value | printf "%.4f" }}，【30m总量】={{ $values.T30M_L.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: receipt_rate_low_smooth
 
       - uid: sdr_slo_burn_slow_30m
-        title: SupplierDeliverSLOBurnSlow30m
+        title: 供应商投递SLO缓慢消耗（30分钟）
         condition: D
         data:
           - refId: A
@@ -1008,11 +1008,11 @@ groups:
             【燃尽】30m={{ $values.BR30_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: slo_burn_slow_30m
 
       - uid: sdr_slo_burn_slow_6h
-        title: SupplierDeliverSLOBurnSlow6h
+        title: 供应商投递SLO缓慢消耗（6小时）
         condition: D
         data:
           - refId: A
@@ -1150,11 +1150,11 @@ groups:
             【燃尽】2h={{ $values.BR6H_L.Value | printf "%.2f" }}（SLO=0.98）
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: slo_burn_slow_6h
 
       - uid: sd_failure_z_anomaly_by_country_default
-        title: SupplierDeliverFailureZScoreAnomalyByCountryDefault
+        title: 供应商投递失败Z分数异常（国家默认）
         condition: D
         data:
           - refId: ER5
@@ -1426,12 +1426,12 @@ groups:
             【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【均值】={{ $values.AVG_L.Value | printf "%.4f" }}，【标准差】={{ $values.STD_L.Value | printf "%.4f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: failure_z_anomaly_by_country_default
           country_id: "{{ $labels.countryId }}"
 
       - uid: sd_failure_z_anomaly_by_country_highvar
-        title: SupplierDeliverFailureZScoreAnomalyByCountryHighVariance
+        title: 供应商投递失败Z分数异常（国家高方差）
         condition: D
         data:
           - refId: ER5
@@ -1703,6 +1703,6 @@ groups:
             【当前5m失败率】={{ $values.ER5_L.Value | printf "%.4f" }}，【均值】={{ $values.AVG_L.Value | printf "%.4f" }}，【标准差】={{ $values.STD_L.Value | printf "%.4f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: failure_z_anomaly_by_country_highvar
           country_id: "{{ $labels.countryId }}"

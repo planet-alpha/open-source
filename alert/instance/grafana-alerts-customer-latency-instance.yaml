@@ -13,13 +13,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Customer Latency Alerts
-    folder: Business-Latency
+    name: 客户侧延迟告警
+    folder: 业务-客户-延迟
     interval: 1m
     rules:
       # p95 延迟预警（warning）
       - uid: customer_latency_p95_high
-        title: CustomerLatencyP95High
+        title: 客户侧延迟P95偏高
         condition: C
         data:
           - refId: A
@@ -91,15 +91,14 @@ groups:
           summary: "p95 请求耗时过高: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }}"
           description: |
             最近 5 分钟内，p95 请求耗时为 {{ $values.B.Value | printf "%.0f" }} ms，超过阈值 500 ms。
-            请检查服务依赖、数据库慢查询、下游依赖及资源瓶颈。
         labels:
           severity: warning
-          category: latency
+          category: customer-latency
           alert_type: latency_p95
 
       # p99 延迟严重告警（critical）
       - uid: customer_latency_p99_high
-        title: CustomerLatencyP99High
+        title: 客户侧延迟P99偏高
         condition: C
         data:
           - refId: A
@@ -173,12 +172,12 @@ groups:
             最近 5 分钟内，p99 请求耗时为 {{ $values.B.Value | printf "%.0f" }} ms，超过阈值 1000 ms。
         labels:
           severity: critical
-          category: latency
+          category: customer-latency
           alert_type: latency_p99
 
       # 平均耗时预警（warning）
       - uid: customer_latency_avg_high
-        title: CustomerLatencyAvgHigh
+        title: 客户侧平均延迟偏高
         condition: C
         data:
           - refId: A
@@ -250,8 +249,7 @@ groups:
           summary: "平均请求耗时过高: 客户名称:{{ $labels.name }} 客户id :{{ $labels.cId }} 客户应用名称:{{ $labels.appName }} 客户应用id:{{ $labels.appId }}"
           description: |
             最近 10 分钟内，平均请求耗时为 {{ $values.B.Value | printf "%.0f" }} ms，超过阈值 300 ms。
-            建议关注整体性能退化、容量与资源使用情况。
         labels:
           severity: warning
-          category: latency
+          category: customer-latency
           alert_type: latency_avg

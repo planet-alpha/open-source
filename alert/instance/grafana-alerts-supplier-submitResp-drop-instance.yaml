@@ -19,12 +19,12 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier Submit Response Receipt Drop Alerts
-    folder: Business-Supplier-Receipt
+    name: 供应商提交响应回执下降告警
+    folder: 业务-供应商-回执
     interval: 1m
     rules:
       - uid: supplier_receipt_drop_rate
-        title: SupplierReceiptDropRate
+        title: 供应商回执下降率
         condition: D
         data:
           # A: 回执下降比例(%)，相对30m动态基线，且满足绝对下降与总量基线门槛
@@ -269,7 +269,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [5]
+                    params: [40]
                     type: gt
                   operator:
                     type: and
@@ -292,11 +292,9 @@ groups:
         annotations:
           summary: 供应商回执下降率异常
           description: |
-            供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 的回执下降率异常
+            供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 的回执下降率异常，下降超过40%
             当前值：
               - 近30分钟平均回执成功率(%)（动态基线，衡量正常期回执水平）：{{ $values.F.Value | printf "%.2f" }}
-              - 当前1分钟回执成功率(%)（当前实际表现）：{{ $values.H.Value | printf "%.2f" }}
-              - 相对基线的下降幅度(%)（当前相对基线的降幅）：{{ $values.C.Value | printf "%.2f" }}
               - 近30分钟每分钟平均回执数（判断回执数量是否明显下降）：{{ $values.J.Value | printf "%.0f" }}
               - 近30分钟每分钟平均提交量（作为业务基数）：{{ $values.L.Value | printf "%.0f" }}
         labels:

@@ -6,13 +6,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Customer Deliver Latency Alerts
-    folder: Business-Customer-Deliver-Latency
+    name: 客户侧投递延迟告警
+    folder: 业务-客户-投递延迟
     interval: 1m
     rules:
       # ==================== p99 - Critical ====================
       - uid: deliver_latency_p99_critical
-        title: CustomerDeliverLatencyP99Critical
+        title: 客户侧投递延迟P99严重
         condition: C
         data:
           - refId: A
@@ -63,7 +63,7 @@ groups:
 
       # ==================== p99 - High ====================
       - uid: deliver_latency_p99_high
-        title: CustomerDeliverLatencyP99High
+        title: 客户侧投递延迟P99高
         condition: C
         data:
           - refId: A
@@ -114,7 +114,7 @@ groups:
 
       # ==================== p99 - Warning ====================
       - uid: deliver_latency_p99_warning
-        title: CustomerDeliverLatencyP99Warning
+        title: 客户侧投递延迟P99警告
         condition: C
         data:
           - refId: A
@@ -165,7 +165,7 @@ groups:
 
       # ==================== p95 - High ====================
       - uid: deliver_latency_p95_high
-        title: CustomerDeliverLatencyP95High
+        title: 客户侧投递延迟P95高
         condition: C
         data:
           - refId: A
@@ -216,7 +216,7 @@ groups:
 
       # ==================== p95 - Warning ====================
       - uid: deliver_latency_p95_warning
-        title: CustomerDeliverLatencyP95Warning
+        title: 客户侧投递延迟P95警告
         condition: C
         data:
           - refId: A
@@ -267,7 +267,7 @@ groups:
 
       # ==================== 平均时延 - High ====================
       - uid: deliver_latency_avg_high
-        title: CustomerDeliverLatencyAvgHigh
+        title: 客户侧投递平均延迟高
         condition: C
         data:
           - refId: A
@@ -318,7 +318,7 @@ groups:
 
       # ==================== 平均时延 - Warning ====================
       - uid: deliver_latency_avg_warning
-        title: CustomerDeliverLatencyAvgWarning
+        title: 客户侧投递平均延迟警告
         condition: C
         data:
           - refId: A

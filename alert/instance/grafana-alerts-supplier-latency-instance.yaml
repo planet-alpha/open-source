@@ -13,13 +13,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier Latency Alerts
-    folder: Business-Latency
+    name: 供应商延迟告警
+    folder: 业务-供应商-延迟
     interval: 1m
     rules:
       # 供应商侧 p95 延迟预警（warning）
       - uid: supplier_latency_p95_high
-        title: SupplierLatencyP95High
+        title: 供应商延迟P95高
         condition: C
         data:
           - refId: A
@@ -93,12 +93,12 @@ groups:
             
         labels:
           severity: warning
-          category: latency
+          category: supplier-latency
           alert_type: supplier_latency_p95
 
       # 供应商侧 p99 延迟严重告警（critical）
       - uid: supplier_latency_p99_high
-        title: SupplierLatencyP99High
+        title: 供应商延迟P99高
         condition: C
         data:
           - refId: A
@@ -171,12 +171,12 @@ groups:
             当前供应商侧 p99 请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
         labels:
           severity: critical
-          category: latency
+          category: supplier-latency
           alert_type: supplier_latency_p99
 
       # 供应商侧平均耗时预警（warning）
       - uid: supplier_latency_avg_high
-        title: SupplierLatencyAvgHigh
+        title: 供应商平均延迟高
         condition: C
         data:
           - refId: A
@@ -249,5 +249,5 @@ groups:
             当前供应商侧平均请求耗时（ms）：{{ $values.B.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: latency
+          category: supplier-latency
           alert_type: supplier_latency_avg

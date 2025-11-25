@@ -11,5 +11,4 @@
   Summary: {{.Annotations.summary}}
   Time: {{(.StartsAt.Add 28800e9).Format "2006-01-02 15:04:05" }}
   Description: {{.Annotations.description}}
-  Silence: {{ .SilenceURL}}
 {{ end -}}

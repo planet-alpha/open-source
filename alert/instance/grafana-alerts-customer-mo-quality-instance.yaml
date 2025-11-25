@@ -16,13 +16,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Customer MO Quality Alerts
-    folder: Business-MO-Quality
+    name: 客户侧MO质量告警
+    folder: 业务-客户-MO-质量
     interval: 1m
     rules:
       # ================================ 上行成功率过低 ================================
       - uid: mo_success_rate_low
-        title: MOSuccessRateLow
+        title: 上行成功率低
         condition: C
         data:
           - refId: A
@@ -96,7 +96,7 @@ groups:
 
       # ====================== 请求-响应差值比例偏高（应答缺失/阻塞） ======================
       - uid: mo_req_resp_gap_high
-        title: MOReqRespGapHigh
+        title: 上行请求响应间隔过大
         condition: C
         data:
           - refId: A
@@ -178,7 +178,7 @@ groups:
 
       # ================================ 错误率升高 ================================
       - uid: mo_error_rate_high
-        title: MOErrorRateHigh
+        title: 上行错误率高
         condition: C
         data:
           - refId: A
@@ -251,7 +251,7 @@ groups:
 
       # ================================ TPS 激增 ================================
       - uid: mo_tps_surge
-        title: MOTpsSurge
+        title: 上行TPS激增
         condition: C
         data:
           - refId: A

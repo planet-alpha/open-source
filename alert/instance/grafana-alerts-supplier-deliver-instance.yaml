@@ -18,13 +18,13 @@ apiVersion: 1
 
 groups:
   - orgId: 1
-    name: Supplier Deliver Alerts
-    folder: Business-Delivery
+    name: 供应商投递告警
+    folder: 业务-供应商-投递
     interval: 1m
     rules:
       # 回执比例过低告警 (低回执率可能意味着供应商响应问题)
       - uid: sdr_rate_low
-        title: SupplierDeliverReceiptRateLow
+        title: 供应商投递回执率低
         condition: D
         data:
           - refId: A
@@ -216,12 +216,12 @@ groups:
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: receipt_rate_low
 
       # 超时比例过高告警
       - uid: sdt_rate_high
-        title: SupplierDeliverTimeoutRateHigh
+        title: 供应商投递超时率高
         condition: D
         data:
           - refId: A
@@ -411,12 +411,12 @@ groups:
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: timeout_rate_high
 
       # 短期失败率激增告警 (用于快速检测突发问题)
       - uid: sd_failure_rate_surge
-        title: SupplierDeliverFailureRateSurge
+        title: 供应商投递失败率激增
         condition: D
         data:
           - refId: A
@@ -454,7 +454,7 @@ groups:
                     sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*", stat!~"^(DELIVRD|ACCEPTD|timeout)$"}[5m]))
                     /
                     clamp_min(sum by(name, appName)(increase(supplier_deliver_total{smsType="0", cId=~".*", name=~".*", appId=~".*", appName=~".*"}[5m])), 1)
-                  ) > 0.05
+                  ) > 0.40
                 )
                 and
                 (
@@ -650,17 +650,17 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 回执失败率短时激增"
           description: |
-            5 分钟失败率相对 30 分钟失败率出现倍增，且短窗失败率超过 5%。
+            5 分钟失败率相对 30 分钟失败率出现倍增，且短窗失败率超过 40%。
             【当前5m】失败率={{ $values.R5L.Value | printf "%.4f" }}，总量={{ $values.T5L.Value | printf "%.0f" }}
             【基线30m】失败率={{ $values.R30L.Value | printf "%.4f" }}，总量={{ $values.T30L.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: failure_rate_surge
 
       # 分国家/地区的失败率过高告警 (针对您提供的第二组指标)
       - uid: sd_failure_rate_by_country
-        title: SupplierDeliverFailureRateByCountry
+        title: 供应商投递失败率（按国家）
         condition: D
         data:
           - refId: A
@@ -822,7 +822,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0.10]
+                    params: [0.20]
                     type: gt
                   operator:
                     type: and
@@ -845,18 +845,18 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 失败比例过高"
           description: |
-            30 分钟内特定国家/地区的失败比例超过 10%
+            30 分钟内特定国家/地区的失败比例超过 20%
             【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】失败比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: failure_rate_by_country
           country_id: "{{ $labels.countryId }}"
 
       # 分国家/地区的回执比例过低告警
       - uid: sd_receipt_r_low_by_country
-        title: SupplierDeliverReceiptRateLowByCountry
+        title: 供应商回执率低（按国家）
         condition: D
         data:
           - refId: A
@@ -1020,7 +1020,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0.85]
+                    params: [0.70]
                     type: lt
                   operator:
                     type: and
@@ -1043,18 +1043,18 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 回执比例过低"
           description: |
-            30 分钟内特定国家/地区的回执比例低于 85%
+            30 分钟内特定国家/地区的回执比例低于 70%
             【触发值】近5m最低比例={{ $values.RR_MIN.Value | printf "%.4f" }}
             【当前值】回执比例={{ $values.RR.Value | printf "%.4f" }}，30m总回执量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: receipt_rate_low_by_country
           country_id: "{{ $labels.countryId }}"
 
       # 分国家/地区的超时比例过高告警
       - uid: sdt_rate_high_by_country
-        title: SupplierDeliverTimeoutRateHighByCountry
+        title: 供应商超时率高（按国家）
         condition: D
         data:
           - refId: A
@@ -1216,7 +1216,7 @@ groups:
             model:
               conditions:
                 - evaluator:
-                    params: [0.15]
+                    params: [0.20]
                     type: gt
                   operator:
                     type: and
@@ -1239,11 +1239,11 @@ groups:
         annotations:
           summary: "供应商名称:{{ $labels.name }} 供应商应用名称:{{ $labels.appName }} 国家/地区:{{ $labels.countryId }} 超时比例过高"
           description: |
-            30 分钟内特定国家/地区的超时比例超过 15%
+            30 分钟内特定国家/地区的超时比例超过 20%
             【触发值】近5m最高比例={{ $values.RR_MAX.Value | printf "%.4f" }}
             【当前值】超时比例={{ $values.RR.Value | printf "%.4f" }}，30m总量={{ $values.TT.Value | printf "%.0f" }}
         labels:
           severity: warning
-          category: delivery
+          category: supplier-deliver
           alert_type: timeout_rate_high_by_country
           country_id: "{{ $labels.countryId }}"

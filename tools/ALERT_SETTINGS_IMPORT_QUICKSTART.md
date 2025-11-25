@@ -25,8 +25,14 @@ cd c:\work\project\grafana
 ```
 导入联系点（Contact Points）：
 ```
-$env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --contact-points alert\setting\supplier-contact-points.yaml
+$env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --contact-points alert\setting\ponts\supplier-contact-points.yaml
+$env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --contact-points alert\setting\ponts\customer-contact-points.yaml
+
+$env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --contact-points alert\setting\pa\supplier-contact-points.yaml
+$env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --contact-points alert\setting\pa\customer-contact-points.yaml
 ```
+
+
 导入通知策略（Policies）：
 ```
 $env:VERIFY_ENV="false"; python -u tools\import_alert_settings.py --notification-policies alert\setting\supplier-notification-policies.yaml

@@ -31,6 +31,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -51,6 +52,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -71,6 +73,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/bf99d439e67840f455e5cff31d843788"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -91,6 +94,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/bf99d439e67840f455e5cff31d843788"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -111,6 +115,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -131,6 +136,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/fc9f360370edfc7ead15058dc9d7aed1"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -151,6 +157,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -171,6 +178,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -191,6 +199,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/a35104680ae83270ff328349382d8262"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
 
@@ -211,6 +220,7 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/fc9f360370edfc7ead15058dc9d7aed1"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
   # 10) 客户侧 TPS 激增
@@ -230,5 +240,6 @@ contactPoints:
         settings:
           url: "https://www.feishu.cn/flow/api/trigger-webhook/1c26e8682bc2c130c844a777a8103d2c"
           message: '{{ template "custom.alerts" . }}'
+          title: '{{ template "custom.title" . }}'
           httpMethod: POST
           maxAlerts: '0'
